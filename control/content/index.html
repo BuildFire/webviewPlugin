@@ -1,0 +1,142 @@
+﻿<!DOCTYPE html>
+<html ng-app="webviewPlugin">
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>content</title>
+    <!-- CSS -->
+    <link href="../../../../styles/helper.css" rel="stylesheet">
+    <link href="../../../../styles/siteIcons.css" rel="stylesheet">
+
+    <!-- JS -->
+    <script src="../../../../scripts/buildfire.js"></script>
+    <script src="../../../../scripts/angular/angular.min.js"></script>
+    <!--<script src="../../../../scripts/angular/ui-bootstrap.min.js"></script> -->
+    <script src="../../../../scripts/jquery/jquery-1.11.2.min.js"></script>
+</head>
+<body ng-controller="webviewPluginCtrl" id="webviewApp">
+    <div ng-form="frmMain">
+        <div class="item clearfix row">
+            <div class="labels col-md-2 padding-right-zero pull-left">
+                <span>Text</span>
+            </div>
+            <div class="col-md-8 pull-left">
+                <input id="text" ui-tinymce class="form-control" ng-model="data.content.text">
+            </div>
+            <div class="col-md-2 pull-left padding-left-zero">
+                <button class="btn btn-primary" style="width: 100%;">
+                    Validate
+                </button>
+            </div>
+        </div>
+
+
+        <div class="item clearfix row">
+            <div class="labels col-md-2 padding-right-zero pull-left"></div>
+            <div class="col-md-10 pull-left">
+                <div class="checkbox checkbox-primary">
+                    <input id="checkboxid" type="checkbox">
+                    <label for="checkboxid">Open URL in the app </label>
+                </div>
+            </div>
+        </div>
+
+        <hr class="none">
+        <div class="item clearfix row">
+            <div class="labels col-md-2 padding-right-zero pull-left"></div>
+            <div class="col-md-10 pull-left" style="padding-left: 46px;">
+                <p>
+                    NOTE 1: For the best user experince link to mobile optimized content.
+                </p>
+
+                <p>
+                    NOTE 2: Based on your web content's settings, some contents will not show up in the emulator.
+                    however if you do not see your content in the emulator, it will still show up in the app.
+                </p>
+
+                <p>
+                    NOTE 3: If you are taking payments through this web page,
+                    you must open the the URL outside of the app or the app will get rejected by Apple in the submission review process.
+                </p>
+
+                <p>
+                    HNIT: If you are taking payments, use your app or content DeepLink URL to redirect back to the app after a payment is made.
+                </p>
+            </div>
+        </div>
+
+
+        
+    </div>
+
+    <script>
+        var textPluginApp = angular.module('webviewPlugin', []);
+
+        textPluginApp.controller('webviewPluginCtrl', ['$scope', function ($scope) {
+            /*
+             * Go pull any previously saved data
+             * */
+            buildfire.datastore.get(function (err, result) {
+                //if (result && result.data && !angular.equals({}, result.data)) {
+                //    $scope.data = result.data;
+                //    $scope.id = result.id;
+                //    if($scope.data.content && $scope.data.content.carouselImages)
+                //        editor.loadItems($scope.data.content.carouselImages);
+                //    if (tmrDelay) clearTimeout(tmrDelay);
+                //} else {
+                //    $scope.data = {
+                //        content: {
+                //            carouselImages: [],
+                //            text: ""
+                //        },
+                //        design: {
+                //            backgroundImage: null,
+                //            backgroundBlur: 0
+                //        }
+                //    };
+                //    editor.loadItems($scope.data.content.carouselImages);
+                //}
+
+
+                //if (!$scope.$$phase && !$scope.$root.$$phase) {
+                //    $scope.$apply();
+                //}
+                ///*
+                // * watch for changes in data and trigger the saveDataWithDelay function on change
+                // * */
+                //$scope.$watch('data', saveDataWithDelay, true);
+            });
+
+            /*
+             * Call the datastore to save the data object
+             */
+            var saveData = function (newObj) {
+                if (newObj == undefined) return;
+                if ($scope.frmMain.$invalid) {
+                    console.warn('invalid data, details will not be saved');
+                    return;
+                }
+
+                buildfire.datastore.save(newObj, function (err, result) {
+                    if (err || !result) {
+                        console.error('Error saving the widget details: ', err);
+                    }
+                    else {
+                        console.info('Widget details saved');
+                    }
+                });
+            };
+
+            /*
+             * create an artificial delay so api isnt called on every character entered
+             * */
+            var tmrDelay = null;
+            var saveDataWithDelay = function (newObj, oldObj) {
+                if (tmrDelay) clearTimeout(tmrDelay);
+                tmrDelay = setTimeout(function () {
+                    saveData(newObj);
+                }, 500);
+            };
+        }]);
+    </script>
+</body>
+</html>
