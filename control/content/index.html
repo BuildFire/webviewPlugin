@@ -1,0 +1,146 @@
+﻿<!DOCTYPE html>
+<html ng-app="webviewPlugin">
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>content</title>
+    <!-- CSS -->
+    <link href="../../../../styles/helper.css" rel="stylesheet">
+    <link href="../../../../styles/siteIcons.css" rel="stylesheet">
+
+    <!-- JS -->
+    <script src="../../../../scripts/buildfire.js"></script>
+    <script src="../../../../scripts/angular/angular.min.js"></script>
+</head>
+<body ng-controller="webviewPluginCtrl" id="webviewApp" ng-cloak>
+    <div ng-form="frmMain">
+        <div class="item clearfix row margin-bottom-fifteen">
+            <div class="labels col-md-2 padding-right-zero pull-left">
+                <span>URL</span>
+            </div>
+            <div class="col-md-10 pull-left">
+                <input id="url" name="url" type="url" class="form-control" ng-model="data.content.url" required>
+            </div>
+        </div>
+
+        <div class="item clearfix row" ng-show="!urlValid">
+            <div class="labels col-md-2 padding-right-zero pull-left"></div>
+            <div class="col-md-10 pull-left">
+                <div class="alert alert-danger transition-half">Please enter a valid URL</div>
+            </div>
+        </div>
+
+        <div class="item clearfix row">
+            <div class="labels col-md-2 padding-right-zero pull-left"></div>
+            <div class="col-md-10 pull-left">
+                <div class="checkbox checkbox-primary">
+                    <input id="checkboxid" type="checkbox" ng-checked="data.content.openInApp" ng-model="data.content.openInApp">
+                    <label for="checkboxid">Open URL in the app </label>
+                </div>
+            </div>
+        </div>
+
+        <hr class="none">
+
+        <div class="item clearfix row">
+            <div class="labels col-md-2 padding-right-zero pull-left"></div>
+            <div class="col-md-10 pull-left" style="padding-left: 46px;">
+                <p>
+                    NOTE 1: For the best user experince link to mobile optimized content.
+                </p>
+
+                <p>
+                    NOTE 2: Based on your web content's settings, some contents will not show up in the emulator.
+                    however if you do not see your content in the emulator, it will still show up in the app.
+                </p>
+
+                <p>
+                    NOTE 3: If you are taking payments through this web page,
+                    you must open the the URL outside of the app or the app will get rejected by Apple in the submission review process.
+                </p>
+
+                <p>
+                    HINT: If you are taking payments, use your app or content DeepLink URL to redirect back to the app after a payment is made.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var webviewPluginApp = angular.module('webviewPlugin', []);
+
+        webviewPluginApp.controller("webviewPluginCtrl", ["$scope", "$log", "$timeout", function ($scope, $log, $timeout) {
+            $scope.urlValid = true;
+            /*
+             * Go pull any previously saved data
+             * */
+            buildfire.datastore.get(function (err, result) {
+                if (result && result.data && !angular.equals({}, result.data)) {
+                    $scope.data = result.data;
+                    $scope.id = result.id;
+                } else {
+                    $scope.data = {
+                        content: {
+                            url: "",
+                            openInApp: false
+                        }
+                    };
+                }
+
+                /*
+                 * watch for changes in data and trigger the saveDataWithDelay function on change
+                 * */
+                $scope.$watch('data', saveData, true);
+
+                if (!$scope.$$phase && !$scope.$root.$$phase) {
+                    $scope.$apply();
+                }
+            });
+
+            var timer = null, formTimer = null;
+            /*
+             * Call the datastore to save the data object
+             */
+            var saveData = function (newObj, oldObj) {
+                //
+                // if the object did not change no need to save the data
+                if (angular.equals(newObj, oldObj) || newObj == undefined) {
+                    return;
+                }
+
+                if (timer) {
+                    $timeout.cancel(timer);
+                }
+
+                if (formTimer) {
+                    $timeout.cancel(formTimer);
+                }
+
+                formTimer = $timeout(function () {
+                    if ($scope.frmMain.$invalid) {
+                        $scope.urlValid = false;
+                    } else {
+                        $scope.urlValid = true;
+                    }
+                }, 1000);
+
+                timer = $timeout(function () {
+                    // if the form has some invalid data do not save, in our case the user eneter invalid URL
+                    if ($scope.frmMain.$invalid) {
+                        $log.warn('invalid data, details will not be saved');
+                        return;
+                    }
+
+                    buildfire.datastore.save(newObj, function (err, result) {
+                        if (err || !result) {
+                            $log.error('Error saving the widget details: ', err);
+                        }
+                        else {
+                            $log.info('Widget details saved');
+                        }
+                    });
+                }, 1000);
+            };
+        }]);
+    </script>
+</body>
+</html>

@@ -1,0 +1,82 @@
+﻿<!DOCTYPE html>
+<html ng-app="webviewPlugin">
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>widget</title>
+    <script src="../../../scripts/angular/angular.min.js"></script>
+    <script type="text/javascript" src="../../../scripts/buildfire.js"></script>
+    <style>
+        iframe {
+            position: fixed;
+            height: 100%;
+            top: 0;
+            left: 0;
+        }
+    </style>
+</head>
+<body ng-controller="webviewPluginCtrl" ng-cloak>
+    <iframe ng-src="{{ url }}" ng-if="data.content.openInApp" iframe-onload="iframeLoadedCallBack()"></iframe>
+    <script>
+        var webviewPluginApp = angular.module('webviewPlugin', []);
+
+        webviewPluginApp.directive("iframeOnload", [function () {
+            return {
+                scope: {
+                    callBack: '&iframeOnload'
+                },
+                link: function (scope, element, attrs) {
+                    element.on('load', function () {
+                        return scope.callBack();
+                    })
+                }
+            }
+        }])
+
+        webviewPluginApp.controller('webviewPluginCtrl', ["$scope", "$sce", function ($scope, $sce) {
+            buildfire.spinner.show();
+            /*
+             * Go pull saved data
+             * */
+            function loadData() {
+                buildfire.datastore.get(function (err, result) {
+                    var content = null;
+                    if (result && result.data && !angular.equals({}, result.data)) {
+                        if (result.data.content) {
+                            content = result.data.content;
+                            $scope.data = result.data;
+                            $scope.url = $sce.trustAsResourceUrl(content.url);
+                            if (!content.openInApp && content.url) {
+                                buildfire.navigation.openWindow(content.url, "_system");
+                                buildfire.spinner.hide();
+								if (buildfire.context.device.platform != "web") {
+									buildfire.navigation.goBack();
+								}
+                            }
+                            if (!$scope.$$phase && !$scope.$root.$$phase) {
+                                $scope.$apply();
+                            }
+                        }
+                    } else {
+                        buildfire.spinner.hide();
+                    }
+                });
+            }
+
+            $scope.iframeLoadedCallBack = function () {
+                buildfire.spinner.hide();
+            }
+
+            loadData();
+
+            /**
+             * when a refresh is triggered get reload data
+             */
+            buildfire.datastore.onRefresh(loadData);
+
+            buildfire.datastore.onUpdate(function (e) {
+                loadData();
+            });
+        }]);
+    </script>
+</body>
+</html>
