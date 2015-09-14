@@ -1,121 +1,67 @@
 ﻿<!DOCTYPE html>
-<html ng-app="textPlugin">
+<html ng-app="webviewPlugin">
 <head lang="en">
     <meta charset="UTF-8">
-    <title>Text widget</title>
-
-    <link href="../../../scripts/owlCarousel/owlCarousel.css" rel="stylesheet" />
-
+    <title>widget</title>
     <script src="../../../scripts/angular/angular.min.js"></script>
-    <script src="../../../scripts/jquery/jquery-1.11.2.min.js"></script>
     <script type="text/javascript" src="../../../scripts/buildfire.js"></script>
-    <script type="text/javascript" src="../../../scripts/owlCarousel/owlCarousel.js"></script>
-    <script src="../../../scripts/buildfire/components/carousel/carousel.js"></script>
-
-</head>
-<body ng-controller="textPluginCtrl" ng-cloak>
     <style>
-        .overlay {
-            position: absolute;
+        iframe {
+            position: fixed;
+            height: 100%;
             top: 0;
             left: 0;
-            width: 100%;
-        }
-
-        .overlay.background {
-                position: fixed;
-                height: 100%;
-            }
-
-            .overlay.background img {
-                height: 100%;
-            }
-
-        .owl-carousel .owl-controls .owl-dots {
-            text-align: center;
         }
     </style>
-    <div class="overlay background" ng-if="data.design.backgroundImage && deviceWidth != 0 && deviceHeight != 0">
-        <img ng-src="{{ cropImage(data.design.backgroundImage, {width: deviceWidth, height: deviceHeight}) }}"
-             style="-webkit-filter: blur({{data.design.backgroundBlur}}px);
-             -moz-filter blur({{data.design.backgroundBlur}}px);
-             -o-filter blur({{data.design.backgroundBlur}}px);
-             -ms-filter blur({{data.design.backgroundBlur}}px);
-             filter blur({{data.design.backgroundBlur}}px);">
-    </div>
-    <div class="overlay">
-        <div id="carousel"></div>
-        <div ng-bind-html="data.content.text" class="widget-content padded"></div>
-    </div>
+</head>
+<body ng-controller="webviewPluginCtrl" ng-cloak>
+    <iframe ng-src="{{ url }}" ng-if="data.content.openInApp" iframe-onload="iframeLoadedCallBack()"></iframe>
     <script>
-        var textPluginApp = angular.module('textPlugin', []);
+        var webviewPluginApp = angular.module('webviewPlugin', []);
 
-        textPluginApp.controller('textPluginCtrl', ['$scope', '$sce', function ($scope, $sce) {
-            var view = null;
-
-            $scope.deviceHeight = window.innerHeight;
-            $scope.deviceWidth = window.innerWidth;
-
-            $scope.data = {
-                content: {
-                    carouselImages: [],
-                    text: ""
+        webviewPluginApp.directive("iframeOnload", [function () {
+            return {
+                scope: {
+                    callBack: '&iframeOnload'
                 },
-                design: {
-                    backgroundImage: null,
-                    backgroundBlur: 0
-                }
-            };
-
-            function initDeviceSize(callback) {
-                $scope.deviceHeight = window.innerHeight;
-                $scope.deviceWidth = window.innerWidth;
-                $scope.sliderHeight = Math.ceil(9 * $scope.deviceWidth / 16);
-                if (callback) {
-                    if ($scope.deviceWidth == 0 || $scope.deviceHeight == 0) {
-                        setTimeout(function () {
-                            initDeviceSize(callback);
-                        }, 500);
-                    } else {
-                        callback();
-                        if (!$scope.$$phase && !$scope.$root.$$phase) {
-                            $scope.$apply();
-                        }
-                    }
+                link: function (scope, element, attrs) {
+                    element.on('load', function () {
+                        return scope.callBack();
+                    })
                 }
             }
+        }])
 
-            /*
-             * bind data to the scope
-             * */
-            function bind(data) {
-                $scope.data = data;
-                if (data && data.content && data.content.text) {
-                    $scope.data.content.text = $sce.trustAsHtml(data.content.text);
-                }
-
-                if ($scope.data.content && $scope.data.content.carouselImages) {
-                    initDeviceSize(function () {
-                        if (!view) {
-                            view = new buildfire.components.carousel.view("#carousel", $scope.data.content.carouselImages);
-                        } else {
-                            view.loadItems($scope.data.content.carouselImages);
-                        }
-                    });
-                }
-
-                if (!$scope.$$phase && !$scope.$root.$$phase) {
-                    $scope.$apply();
-                }
-            }
-
+        webviewPluginApp.controller('webviewPluginCtrl', ["$scope", "$sce", function ($scope, $sce) {
+            buildfire.spinner.show();
             /*
              * Go pull saved data
              * */
             function loadData() {
                 buildfire.datastore.get(function (err, result) {
-                    if (result && result.data && !angular.equals({}, result.data)) bind(result.data);
+                    var content = null;
+                    if (result && result.data && !angular.equals({}, result.data)) {
+                        if (result.data.content) {
+                            content = result.data.content;
+                            $scope.data = result.data;
+                            $scope.url = $sce.trustAsResourceUrl(content.url);
+                            if (!content.openInApp && content.url) {
+                                buildfire.navigation.openWindow(content.url, "_system");
+                                buildfire.spinner.hide();
+                                buildfire.navigation.goBack();
+                            }
+                            if (!$scope.$$phase && !$scope.$root.$$phase) {
+                                $scope.$apply();
+                            }
+                        }
+                    } else {
+                        buildfire.spinner.hide();
+                    }
                 });
+            }
+
+            $scope.iframeLoadedCallBack = function () {
+                buildfire.spinner.hide();
             }
 
             loadData();
@@ -128,25 +74,7 @@
             buildfire.datastore.onUpdate(function (e) {
                 loadData();
             });
-
-            $scope.cropImage = function (url, settings) {
-                var options = {};
-                if (!url) {
-                    return "";
-                }
-                else {
-                    if (settings.height) {
-                        options.height = settings.height;
-                    }
-                    if (settings.width) {
-                        options.width = settings.width;
-                    }
-                    return buildfire.imageLib.cropImage(url, options);
-                }
-            };
-
         }]);
     </script>
 </body>
-
 </html>
