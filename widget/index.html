@@ -48,7 +48,9 @@
                             if (!content.openInApp && content.url) {
                                 buildfire.navigation.openWindow(content.url, "_system");
                                 buildfire.spinner.hide();
-                                buildfire.navigation.goBack();
+								if (buildfire.context.device.platform != "web") {
+									buildfire.navigation.goBack();
+								}
                             }
                             if (!$scope.$$phase && !$scope.$root.$$phase) {
                                 $scope.$apply();
