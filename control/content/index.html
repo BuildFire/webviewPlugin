@@ -17,8 +17,13 @@
             <div class="labels col-md-2 padding-right-zero pull-left">
                 <span>URL</span>
             </div>
-            <div class="col-md-10 pull-left">
+            <div class="col-md-8 pull-left">
                 <input id="url" name="url" type="text" class="form-control" ng-model="data.content.url" required pattern="[-a-zA-Z0-9@:%_\+.~#?&//=]{2,256}\.[a-z]{2,4}\b(\/[-a-zA-Z0-9@:%_\+.~#?&//=]*)?">
+            </div>
+            <div class="col-md-2 pull-left padding-zero">
+                <button class="btn btn-success" ng-click="validateUrl()">
+                    Validate
+                </button>
             </div>
         </div>
 
@@ -33,7 +38,7 @@
             <div class="labels col-md-2 padding-right-zero pull-left"></div>
             <div class="col-md-10 pull-left">
                 <div class="checkbox checkbox-primary">
-                    <input id="checkboxid" type="checkbox" ng-checked="data.content.openInApp" ng-model="data.content.openInApp">
+                    <input id="checkboxid" type="checkbox" ng-checked="data.content.openInApp" ng-model="data.content.openInApp" ng-change="openMethodChanged()">
                     <label for="checkboxid">Open URL in the app </label>
                 </div>
             </div>
@@ -69,6 +74,7 @@
         var webviewPluginApp = angular.module('webviewPlugin', []);
 
         webviewPluginApp.controller("webviewPluginCtrl", ["$scope", "$log", "$timeout", function ($scope, $log, $timeout) {
+            dataChanged = false;
             $scope.urlValid = true;
             /*
              * Go pull any previously saved data
@@ -87,45 +93,80 @@
                 }
 
                 /*
-                 * watch for changes in data and trigger the saveDataWithDelay function on change
+                 * watch for changes in data
                  * */
-                $scope.$watch('data', saveData, true);
+                $scope.$watch('data', function (newObj, oldObj) {
+                    if (angular.equals(newObj, oldObj) || newObj == undefined) {
+                        dataChanged = false;
+                    } else {
+                        dataChanged = true;
+                    }
+                }, true);
 
                 if (!$scope.$$phase && !$scope.$root.$$phase) {
                     $scope.$apply();
                 }
             });
 
-            var timer = null;
-            /*
-             * Call the datastore to save the data object
-             */
-            var saveData = function (newObj, oldObj) {
-                //
-                // if the object did not change no need to save the data
-                if (angular.equals(newObj, oldObj) || newObj == undefined) {
+            //var timer = null;
+            ///*
+            // * Call the datastore to save the data object
+            // */
+            //var saveData = function (newObj, oldObj) {
+            //    //
+            //    // if the object did not change no need to save the data
+            //    if (angular.equals(newObj, oldObj) || newObj == undefined) {
+            //        return;
+            //    }
+
+            //    if (timer) {
+            //        $timeout.cancel(timer);
+            //    }
+
+            //    timer = $timeout(function () {
+            //        // if the form has some invalid data do not save, in our case the user eneter invalid URL
+            //        if ($scope.frmMain.$invalid) {
+            //            $scope.urlValid = false;
+            //            $log.warn('invalid data, details will not be saved');
+            //            return;
+            //        }
+
+            //        $scope.urlValid = true;
+
+            //        if (!/^https?\:\/\//.test(newObj.content.url)) {
+            //            newObj.content.url = "http://" + newObj.content.url;
+            //        }
+
+            //        buildfire.datastore.save(newObj, function (err, result) {
+            //            if (err || !result) {
+            //                $log.error('Error saving the widget details: ', err);
+            //            }
+            //            else {
+            //                $log.info('Widget details saved');
+            //            }
+            //        });
+            //    }, 1000);
+            //};
+
+
+            $scope.saveData = function () {
+                if (!dataChanged) {
+                    console.warn("data didn't changed")
                     return;
                 }
-
-                if (timer) {
-                    $timeout.cancel(timer);
-                }
-
-                timer = $timeout(function () {
-                    // if the form has some invalid data do not save, in our case the user eneter invalid URL
-                    if ($scope.frmMain.$invalid) {
-                        $scope.urlValid = false;
-                        $log.warn('invalid data, details will not be saved');
-                        return;
-                    }
-
+                var data = $scope.data;
+                // if the form has some invalid data do not save, in our case the user eneter invalid URL
+                if ($scope.frmMain.$invalid) {
+                    $log.warn('invalid data, details will not be saved');
+                    $scope.urlValid = false;
+                } else {
                     $scope.urlValid = true;
-
-                    if (!/^https?\:\/\//.test(newObj.content.url)) {
-                        newObj.content.url = "http://" + newObj.content.url;
+                    dataChanged = false;
+                    if (!/^https?\:\/\//.test(data.content.url)) {
+                        data.content.url = "http://" + data.content.url;
                     }
 
-                    buildfire.datastore.save(newObj, function (err, result) {
+                    buildfire.datastore.save(data, function (err, result) {
                         if (err || !result) {
                             $log.error('Error saving the widget details: ', err);
                         }
@@ -133,8 +174,24 @@
                             $log.info('Widget details saved');
                         }
                     });
-                }, 1000);
+                }
             };
+
+            $scope.validateUrl = function () {
+                $scope.saveData();
+            };
+
+            $scope.openMethodChanged = function () {
+                dataChanged = true;
+                buildfire.datastore.save($scope.data, function (err, result) {
+                    if (err || !result) {
+                        $log.error('Error saving the widget details: ', err);
+                    }
+                    else {
+                        $log.info('Widget details saved');
+                    }
+                });
+            }
         }]);
     </script>
 </body>
