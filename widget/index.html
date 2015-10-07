@@ -12,10 +12,38 @@
             top: 0;
             left: 0;
         }
+
+        div.link-verified {
+            height: 100%;
+            position: relative;
+        }
+            /* 1 */
+            div.link-verified > div {
+                margin: 0;
+                position: absolute; /* 2 */
+                top: 50%; /* 3 */
+                transform: translate(0, -50%);
+                width: 100%;
+            }
+
+            div.link-verified .glyphicon {
+                border: 2px solid;
+                padding: 10px;
+                border-radius: 50%;
+                margin-bottom: 20px;
+            }
     </style>
 </head>
 <body ng-controller="webviewPluginCtrl" ng-cloak>
-    <iframe ng-src="{{ url }}" ng-if="data.content.openInApp" iframe-onload="iframeLoadedCallBack()"></iframe>
+    <iframe ng-src="{{ url }}" ng-if="data.content.openInApp && !isWebPlateform" iframe-onload="iframeLoadedCallBack()"></iframe>
+    <div class="text-center link-verified" ng-if="data && data.content.url && isWebPlateform">
+        <div class="col-md-12">
+            <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+            <p>
+                We were able to verify the link you provided. The link will only appear on your mobile device.
+            </p>
+        </div>
+    </div>
     <script>
         var webviewPluginApp = angular.module('webviewPlugin', []);
 
@@ -27,37 +55,45 @@
                 link: function (scope, element, attrs) {
                     element.on('load', function () {
                         return scope.callBack();
-                    })
+                    });
                 }
             }
         }])
 
         webviewPluginApp.controller('webviewPluginCtrl', ["$scope", "$sce", function ($scope, $sce) {
             buildfire.spinner.show();
+
+            function dataLoadedHandler(result) {
+                var content = null;
+                if (result && result.data && !angular.equals({}, result.data)) {
+                    if (result.data.content) {
+                        content = result.data.content;
+                        $scope.data = result.data;
+                        $scope.url = $sce.trustAsResourceUrl(content.url);
+                        $scope.isWebPlateform = (buildfire.context.device.platform == "web");
+                        if (!content.openInApp && content.url) {
+                            if (buildfire.context.device.platform != "web") {
+                                buildfire.navigation.openWindow(content.url, "_system");
+                                buildfire.navigation.goBack();
+                            }
+                        }
+                        if (!$scope.$$phase && !$scope.$root.$$phase) {
+                            $scope.$apply();
+                        }
+                    }
+                }
+                buildfire.spinner.hide();
+            }
+
             /*
              * Go pull saved data
              * */
             function loadData() {
                 buildfire.datastore.get(function (err, result) {
-                    var content = null;
-                    if (result && result.data && !angular.equals({}, result.data)) {
-                        if (result.data.content) {
-                            content = result.data.content;
-                            $scope.data = result.data;
-                            $scope.url = $sce.trustAsResourceUrl(content.url);
-                            if (!content.openInApp && content.url) {
-                                buildfire.navigation.openWindow(content.url, "_system");
-                                buildfire.spinner.hide();
-								if (buildfire.context.device.platform != "web") {
-									buildfire.navigation.goBack();
-								}
-                            }
-                            if (!$scope.$$phase && !$scope.$root.$$phase) {
-                                $scope.$apply();
-                            }
-                        }
+                    if (err) {
+                        console.error("Error: ", err);
                     } else {
-                        buildfire.spinner.hide();
+                        dataLoadedHandler(result);
                     }
                 });
             }
@@ -73,8 +109,8 @@
              */
             buildfire.datastore.onRefresh(loadData);
 
-            buildfire.datastore.onUpdate(function (e) {
-                loadData();
+            buildfire.datastore.onUpdate(function (result) {
+                dataLoadedHandler(result);
             });
         }]);
     </script>
