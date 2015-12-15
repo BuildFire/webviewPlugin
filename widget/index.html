@@ -38,7 +38,7 @@
     </style>
 </head>
 <body ng-controller="webviewPluginCtrl" ng-cloak>
-    <iframe ng-src="{{ url }}" ng-if="data.content.openInApp && !isWebPlateform" iframe-onload="iframeLoadedCallBack()"></iframe>
+    <iframe ng-src="{{ url }}" ng-if="data.content.openInApp && !isWebPlateform" iframe-onload="iframeLoadedCallBack()" id="webviewIframe"></iframe>
     <div class="text-center link-verified" ng-if="data && data.content.url && isWebPlateform">
         <div class="col-md-12">
             <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
@@ -86,6 +86,7 @@
                     }
                 }
                 buildfire.spinner.hide();
+
             }
 
             /*
@@ -103,11 +104,48 @@
                 });
             }
 
+
+
+
+            var history = [] ;
+            var isBackClicked = false;
+
+
+            buildfire.navigation.onBackButtonClick = function(){
+
+                var oldUrl = history.pop();
+                var webviewIframe = document.getElementById("webviewIframe");
+                if(oldUrl == webviewIframe.contentWindow.location.href)
+                    oldUrl = history.pop();
+
+                if(oldUrl){
+                    isBackClicked= true;
+                    webviewIframe.src = oldUrl;
+                } else {
+                    buildfire.navigation.restoreBackButtonClick();
+                    buildfire.navigation.goBack();
+                }
+            };
+
             $scope.iframeLoadedCallBack = function () {
+                var webviewIframe = document.getElementById("webviewIframe");
                 buildfire.spinner.hide();
-            }
+                if(!isBackClicked){
+                    var oldUrl = webviewIframe.contentWindow.location.href;
+                    history.push(oldUrl);
+                }else
+                    isBackClicked= false;
+
+                webviewIframe.contentWindow.addEventListener('hashchange',function(){
+                    if(!isBackClicked){
+                    var oldUrl = webviewIframe.contentWindow.location.href;
+                    history.push(oldUrl);
+                }else
+                    isBackClicked= false;});
+            };
 
             loadData();
+
 
             /**
              * when a refresh is triggered get reload data
