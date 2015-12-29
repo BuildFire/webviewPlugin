@@ -13,61 +13,31 @@
 </head>
 <body ng-controller="webviewPluginCtrl" id="webviewApp" ng-cloak ng-show="datastoreInitialized">
     <div ng-form="frmMain">
-        <div class="item clearfix row margin-bottom-fifteen">
-            <div class="labels col-md-2 padding-right-zero pull-left">
+	
+		<div class="item clearfix row margin-bottom-fifteen">
+            <div class="labels col-md-3 padding-right-zero pull-left">
                 <span>URL</span>
             </div>
-            <div class="col-md-8 pull-left">
-                <input id="url" name="url" type="text" class="form-control" ng-model="data.content.url" required pattern="[-a-zA-Z0-9@:%_\+.~#?&//=]{2,256}\.[a-z]{2,4}\b(\/[-a-zA-Z0-9@:%_\+.~#?&//=]*)?">
-            </div>
-            <div class="col-md-2 pull-left padding-zero">
-                <button class="btn btn-success" ng-click="validateUrl()">
-                    Validate
-                </button>
-            </div>
+			<div class="main col-md-9 pull-right clearfix">
+           	 	<div class="col-md-9 pull-left padding-left-zero">
+	                <input id="url" name="url" type="text" class="form-control" ng-model="data.content.url" required pattern="[-a-zA-Z0-9@:%_\+.~#?&//=]{2,256}\.[a-z]{2,4}\b(\/[-a-zA-Z0-9@:%_\+.~#?&//=]*)?">
+	            </div>
+	            <div class="col-md-3 pull-right padding-zero">
+	                <button class="btn btn-success stretch" ng-click="validateUrl()">
+	                    Validate
+	                </button>
+	            </div>
+			</div>
         </div>
-
-        <div class="item clearfix row" ng-show="!urlValid">
-            <div class="labels col-md-2 padding-right-zero pull-left"></div>
-            <div class="col-md-10 pull-left">
-                <div class="alert alert-danger transition-half">Please enter a valid URL</div>
-            </div>
-        </div>
-
-        <div class="item clearfix row">
-            <div class="labels col-md-2 padding-right-zero pull-left"></div>
-            <div class="col-md-10 pull-left">
-                <div class="checkbox checkbox-primary">
-                    <input id="checkboxid" type="checkbox" ng-checked="data.content.openInApp" ng-model="data.content.openInApp" ng-change="openMethodChanged()">
-                    <label for="checkboxid">Open URL in the app </label>
-                </div>
-            </div>
-        </div>
-
-        <hr class="none">
-
-        <div class="item clearfix row">
-            <div class="labels col-md-2 padding-right-zero pull-left"></div>
-            <div class="col-md-10 pull-left" style="padding-left: 46px;">
-                <p>
-                    NOTE 1: For the best user experince, link to mobile optimized content.
-                </p>
-
-                <p>
-                    NOTE 2: Based on your web content's settings, some contents will not show up in the emulator.
-                    However, if you do not see your content in the emulator, it will still show up in the app.
-                </p>
-
-                <p>
-                    NOTE 3: If you are taking payments through this web page,
-                    you must open the the URL outside of the app or the app will get rejected by Apple in the submission review process.
-                </p>
-
-                <p>
-                    HINT: If you are taking payments, use your app or content DeepLink URL to redirect back to the app after a payment is made.
-                </p>
-            </div>
-        </div>
+		<hr class="none">
+		<div class="item clearfix row">
+            <div class="col-md-9 pull-right">
+        		<p class="info padding-zero">Note 1: For the best user experience, link to mobile optimized content.</p>
+        		<p class="info padding-zero">Note 2: Based on your web content's settings, some contents will not show up in the emulator. However, if you do not see your content in the emulator, it will still show up in the app.</p>
+        		<p class="info padding-zero">Note 3: If you are taking payments through this web page, you must open the the URL outside of the app or the app will get rejected by Apple in the submission review process.</p>
+        		<p class="info padding-zero">Hint:  you are taking payments, use your app or content DeepLink URL to redirect back to the app after a payment is made.</p>
+   			</div>
+		</div>
     </div>
 
     <script>

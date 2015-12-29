@@ -8,18 +8,13 @@
     <script src="../../../scripts/angular/angular.min.js"></script>
     <script type="text/javascript" src="../../../scripts/buildfire.js"></script>
     <style>
-        iframe {
+        /*iframe {
             position: fixed;
             height: 100%;
             top: 0;
             left: 0;
-        }
+        }*/
 
-        div.link-verified {
-            height: 100%;
-            min-height: 300px;
-            position: relative;
-        }
             /* 1 */
             div.link-verified > div {
                 margin: 0;
@@ -37,9 +32,11 @@
             }
     </style>
 </head>
-<body ng-controller="webviewPluginCtrl" ng-cloak>
-    <iframe ng-src="{{ url }}" ng-if="data.content.openInApp && !isWebPlateform" iframe-onload="iframeLoadedCallBack()" id="webviewIframe"></iframe>
-    <div class="text-center link-verified" ng-if="data && data.content.url && isWebPlateform">
+<body class="no-scroll" ng-controller="webviewPluginCtrl" ng-cloak>
+	<div class="scrollable">
+    	<iframe ng-src="{{ url }}" ng-if="data.content.openInApp && !isWebPlateform" iframe-onload="iframeLoadedCallBack()" id="webviewIframe"></iframe>
+    </div>
+	<div class="text-center link-verified" ng-if="data && data.content.url && isWebPlateform">
         <div class="col-md-12">
             <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
             <p>
