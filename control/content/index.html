@@ -32,6 +32,11 @@
 		<hr class="none">
 		<div class="item clearfix row">
             <div class="col-md-9 pull-right">
+	            <div class="checkbox checkbox-primary margin-top-zero">
+                    <input id="checkboxid" type="checkbox" ng-checked="data.content.openInApp" ng-model="data.content.openInApp" ng-change="openMethodChanged()">
+                    <label for="checkboxid">Open URL in the app </label>
+                </div>
+				<br><br>
         		<p class="info padding-zero">Note 1: For the best user experience, link to mobile optimized content.</p>
         		<p class="info padding-zero">Note 2: Based on your web content's settings, some contents will not show up in the emulator. However, if you do not see your content in the emulator, it will still show up in the app.</p>
         		<p class="info padding-zero">Note 3: If you are taking payments through this web page, you must open the the URL outside of the app or the app will get rejected by Apple in the submission review process.</p>
