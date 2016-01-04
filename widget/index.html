@@ -62,20 +62,21 @@
                         content = result.data.content;
                         $scope.data = result.data;
                         $scope.url = $sce.trustAsResourceUrl(content.url);
-                        $scope.isWebPlateform = (buildfire.context.device.platform == "web");
-                        if (!content.openInApp && content.url) {
-                            if (buildfire.context.device.platform != "web") {
-                                buildfire.navigation.openWindow(content.url, "_system");
-                                buildfire.navigation.goBack();
-                            }
-                        }
-                        if (!$scope.$$phase && !$scope.$root.$$phase) {
-                            $scope.$apply();
-                        }
+						buildfire.getContext(function(err, context){
+							$scope.isWebPlateform = (context.device.platform == "web");
+							if (!content.openInApp && content.url) {
+								if (context.device.platform != "web") {
+									buildfire.navigation.openWindow(content.url, "_system");
+									buildfire.navigation.goBack();
+								}
+							}
+							if (!$scope.$$phase && !$scope.$root.$$phase) {
+								$scope.$apply();
+							}
+							buildfire.spinner.hide();
+						});
                     }
                 }
-                buildfire.spinner.hide();
-
             }
 
             /*
