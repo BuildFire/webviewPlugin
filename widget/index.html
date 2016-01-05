@@ -8,14 +8,15 @@
     <script src="../../../scripts/angular/angular.min.js"></script>
     <script type="text/javascript" src="../../../scripts/buildfire.js"></script>
     <style>
-        div.link-verified{
+        div.link-verified {
             margin: 0;
             position: absolute;
             top: 50%;
-			height:120px;
-			margin-top:-75px;
+            height: 120px;
+            margin-top: -75px;
             width: 100%;
         }
+
         div.link-verified .glyphicon {
             border: 2px solid;
             padding: 10px;
@@ -25,127 +26,126 @@
     </style>
 </head>
 <body class="no-scroll" ng-controller="webviewPluginCtrl" ng-cloak>
-	<div class="scrollable">
-    	<iframe ng-src="{{ url }}" ng-if="data.content.openInApp && !isWebPlateform" style="height:100%; width:1px; min-width:100%;" scrolling="no" iframe-onload="iframeLoadedCallBack()" id="webviewIframe"></iframe>
+<div class="scrollable">
+    <iframe ng-src="{{ url }}" ng-if="data.content.openInApp && !isWebPlateform" style="height:100%; width:1px; min-width:100%;" scrolling="no" iframe-onload="iframeLoadedCallBack()" id="webviewIframe"></iframe>
+</div>
+<div class="text-center link-verified" ng-if="data && data.content.url && isWebPlateform">
+    <div class="col-md-12">
+        <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+        <p>
+            We were able to verify the link you provided. The link will only appear on your mobile device.
+        </p>
     </div>
-	<div class="text-center link-verified" ng-if="data && data.content.url && isWebPlateform">
-        <div class="col-md-12">
-            <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
-            <p>
-                We were able to verify the link you provided. The link will only appear on your mobile device.
-            </p>
-        </div>
-    </div>
-    <script>
-        var webviewPluginApp = angular.module('webviewPlugin', []);
+</div>
+<script>
+    var webviewPluginApp = angular.module('webviewPlugin', []);
 
-        webviewPluginApp.directive("iframeOnload", [function () {
-            return {
-                scope: {
-                    callBack: '&iframeOnload'
-                },
-                link: function (scope, element, attrs) {
-                    element.on('load', function () {
-                        return scope.callBack();
+    webviewPluginApp.directive("iframeOnload", [function () {
+        return {
+            scope: {
+                callBack: '&iframeOnload'
+            },
+            link: function (scope, element, attrs) {
+                element.on('load', function () {
+                    return scope.callBack();
+                });
+            }
+        }
+    }])
+
+    webviewPluginApp.controller('webviewPluginCtrl', ["$scope", "$sce", function ($scope, $sce) {
+        buildfire.spinner.show();
+
+        function dataLoadedHandler(result) {
+            var content = null;
+            if (result && result.data && !angular.equals({}, result.data)) {
+                if (result.data.content) {
+                    content = result.data.content;
+                    $scope.data = result.data;
+                    $scope.url = $sce.trustAsResourceUrl(content.url);
+                    buildfire.getContext(function (err, context) {
+                        $scope.isWebPlateform = (context.device.platform == "web");
+                        if (!content.openInApp && content.url) {
+                            if (context.device.platform != "web") {
+                                buildfire.navigation.openWindow(content.url, "_system");
+                                buildfire.navigation.goBack();
+                            }
+                        }
+                        if (!$scope.$$phase && !$scope.$root.$$phase) {
+                            $scope.$apply();
+                        }
+                        buildfire.spinner.hide();
                     });
                 }
             }
-        }])
+        }
 
-        webviewPluginApp.controller('webviewPluginCtrl', ["$scope", "$sce", function ($scope, $sce) {
-            buildfire.spinner.show();
+        /*
+         * Go pull saved data
+         * */
+        function loadData() {
+            buildfire.datastore.get(function (err, result) {
+                if (err) {
+                    console.error("Error: ", err);
+                    buildfire.spinner.hide();
 
-            function dataLoadedHandler(result) {
-                var content = null;
-                if (result && result.data && !angular.equals({}, result.data)) {
-                    if (result.data.content) {
-                        content = result.data.content;
-                        $scope.data = result.data;
-                        $scope.url = $sce.trustAsResourceUrl(content.url);
-						buildfire.getContext(function(err, context){
-							$scope.isWebPlateform = (context.device.platform == "web");
-							if (!content.openInApp && content.url) {
-								if (context.device.platform != "web") {
-									buildfire.navigation.openWindow(content.url, "_system");
-									buildfire.navigation.goBack();
-								}
-							}
-							if (!$scope.$$phase && !$scope.$root.$$phase) {
-								$scope.$apply();
-							}
-							buildfire.spinner.hide();
-						});
-                    }
-                }
-            }
-
-            /*
-             * Go pull saved data
-             * */
-            function loadData() {
-                buildfire.datastore.get(function (err, result) {
-                    if (err) {
-                        console.error("Error: ", err);
-                        buildfire.spinner.hide();
-
-                    } else {
-                        dataLoadedHandler(result);
-                    }
-                });
-            }
-
-
-
-
-            var history = [] ;
-            var isBackClicked = false;
-
-
-            buildfire.navigation.onBackButtonClick = function(){
-
-                var oldUrl = history.pop();
-                var webviewIframe = document.getElementById("webviewIframe");
-                if(oldUrl == webviewIframe.contentWindow.location.href)
-                    oldUrl = history.pop();
-
-                if(oldUrl){
-                    isBackClicked= true;
-                    webviewIframe.src = oldUrl;
                 } else {
-                    buildfire.navigation.restoreBackButtonClick();
-                    buildfire.navigation.goBack();
+                    dataLoadedHandler(result);
                 }
-            };
-
-            $scope.iframeLoadedCallBack = function () {
-                var webviewIframe = document.getElementById("webviewIframe");
-                buildfire.spinner.hide();
-                if(!isBackClicked){
-                    var oldUrl = webviewIframe.contentWindow.location.href;
-                    history.push(oldUrl);
-                }else
-                    isBackClicked= false;
-
-                webviewIframe.contentWindow.addEventListener('hashchange',function(){
-                    if(!isBackClicked){
-                    var oldUrl = webviewIframe.contentWindow.location.href;
-                    history.push(oldUrl);
-                }else
-                    isBackClicked= false;});
-            };
-
-            loadData();
-
-
-            /**
-             * when a refresh is triggered get reload data
-             */
-            buildfire.datastore.onRefresh(loadData);
-
-            buildfire.datastore.onUpdate(function (result) {
-                dataLoadedHandler(result);
             });
-        }]);
-    </script>
+        }
+
+
+        var history = [];
+        var isBackClicked = false;
+
+
+        buildfire.navigation.onBackButtonClick = function () {
+
+            var oldUrl = history.pop();
+            var webviewIframe = document.getElementById("webviewIframe");
+            if (webviewIframe && oldUrl == webviewIframe.contentWindow.location.href)
+                oldUrl = history.pop();
+
+            if (webviewIframe && oldUrl) {
+                isBackClicked = true;
+                webviewIframe.src = oldUrl;
+            } else {
+                buildfire.navigation.restoreBackButtonClick();
+                buildfire.navigation.goBack();
+            }
+        };
+
+        $scope.iframeLoadedCallBack = function () {
+            var webviewIframe = document.getElementById("webviewIframe");
+            buildfire.spinner.hide();
+            if (!isBackClicked) {
+                var oldUrl = webviewIframe.contentWindow.location.href;
+                history.push(oldUrl);
+            } else
+                isBackClicked = false;
+
+            webviewIframe.contentWindow.addEventListener('hashchange', function () {
+                if (!isBackClicked) {
+                    var oldUrl = webviewIframe.contentWindow.location.href;
+                    history.push(oldUrl);
+                } else
+                    isBackClicked = false;
+            });
+        };
+
+        loadData();
+
+
+        /**
+         * when a refresh is triggered get reload data
+         */
+        buildfire.datastore.onRefresh(loadData);
+
+        buildfire.datastore.onUpdate(function (result) {
+            dataLoadedHandler(result);
+        });
+    }]);
+</script>
 </body>
 </html>
