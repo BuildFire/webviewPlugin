@@ -64,7 +64,7 @@
                     $scope.data = result.data;
                     $scope.url = $sce.trustAsResourceUrl(content.url);
                     buildfire.getContext(function (err, context) {
-                        $scope.isWebPlateform = (context.device.platform == "web");
+                        $scope.isWebPlateform = false;//(context.device.platform == "web");
                         if (!content.openInApp && content.url) {
                             if (context.device.platform != "web") {
                                 buildfire.navigation.openWindow(content.url, "_system");
