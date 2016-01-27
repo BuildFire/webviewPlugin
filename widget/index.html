@@ -104,9 +104,14 @@
 
             var oldUrl = history.pop();
             var webviewIframe = document.getElementById("webviewIframe");
-            if (webviewIframe && oldUrl == webviewIframe.contentWindow.location.href)
-                oldUrl = history.pop();
-
+            try{
+                if (webviewIframe && oldUrl == webviewIframe.contentWindow.location.href)
+                    oldUrl = history.pop();
+            }
+            catch(e){
+                console.warn(e);
+                // most likely cross domain access failure
+            }
             if (webviewIframe && oldUrl) {
                 isBackClicked = true;
                 webviewIframe.src = oldUrl;
