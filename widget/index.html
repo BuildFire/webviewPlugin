@@ -27,7 +27,7 @@
 </head>
 <body class="no-scroll" ng-controller="webviewPluginCtrl" ng-cloak>
 <div class="scrollable">
-    <iframe ng-src="{{ url }}" ng-if="data.content.openInApp && !isWebPlateform" style="height:100%; width:1px; min-width:100%;" scrolling="no" iframe-onload="iframeLoadedCallBack()" id="webviewIframe"></iframe>
+    <iframe ng-src="{{ url }}" ng-if="data.content.openInApp && !isWebPlateform" style="height:100%; width:1px; min-width:100%;" scrolling="yes" iframe-onload="iframeLoadedCallBack()" id="webviewIframe"></iframe>
 </div>
 <div class="text-center link-verified" ng-if="data && data.content.url && isWebPlateform">
     <div class="col-md-12">
