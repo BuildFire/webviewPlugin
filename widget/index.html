@@ -27,15 +27,7 @@
 </head>
 <body class="no-scroll" ng-controller="webviewPluginCtrl" ng-cloak>
 <div class="scrollable">
-    <iframe ng-src="{{ url }}" ng-if="data.content.openInApp && !isWebPlateform" style="height:100%; width:1px; min-width:100%;" scrolling="yes" iframe-onload="iframeLoadedCallBack()" id="webviewIframe"></iframe>
-</div>
-<div class="text-center link-verified" ng-if="data && data.content.url && isWebPlateform">
-    <div class="col-md-12">
-        <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
-        <p>
-            We were able to verify the link you provided. The link will only appear on your mobile device.
-        </p>
-    </div>
+    <iframe ng-src="{{ url }}" ng-if="data.content.openInApp" style="height:100%; width:1px; min-width:100%;" scrolling="{{isWebPlateform ? 'yes':'no'}}" iframe-onload="iframeLoadedCallBack()" id="webviewIframe"></iframe>
 </div>
 <script>
     var webviewPluginApp = angular.module('webviewPlugin', []);
@@ -64,7 +56,7 @@
                     $scope.data = result.data;
                     $scope.url = $sce.trustAsResourceUrl(content.url);
                     buildfire.getContext(function (err, context) {
-                        $scope.isWebPlateform = false;//(context.device.platform == "web");
+                        $scope.isWebPlateform = (context.device.platform == "web");
                         if (!content.openInApp && content.url) {
                             if (context.device.platform != "web") {
                                 buildfire.navigation.openWindow(content.url, "_system");
