@@ -13,14 +13,15 @@
 </head>
 <body ng-controller="webviewPluginCtrl" id="webviewApp" ng-cloak ng-show="datastoreInitialized">
     <div ng-form="frmMain">
-	
-		<div class="item clearfix row margin-bottom-fifteen">
+
+		<div class="item clearfix row margi
+		n-bottom-fifteen">
             <div class="labels col-md-3 padding-right-zero pull-left">
                 <span>URL</span>
             </div>
 			<div class="main col-md-9 pull-right clearfix">
            	 	<div class="col-md-9 pull-left padding-left-zero">
-	                <input id="url" name="url" type="text" class="form-control" ng-model="data.content.url" required pattern="[-a-zA-Z0-9@:%_\+.~#?&//=]{2,256}\.[a-z]{2,4}\b(\/[-a-zA-Z0-9@:%_\+.~#?&//=]*)?">
+	                <input id="url" name="url" type="text" class="form-control" ng-model="data.content.url" required pattern="[-a-zA-Z0-9@:%_\+.~#?&amp;//=]{2,256}\.[a-z]{2,4}\b(\/[-a-zA-Z0-9@:%_\+.~#?!?\/?\w\/?&amp;//=]*)?">
 	            </div>
 	            <div class="col-md-3 pull-right padding-zero">
 	                <button class="btn btn-success stretch" ng-click="validateUrl()">
@@ -29,6 +30,16 @@
 	            </div>
 			</div>
         </div>
+<br>
+      <div class="item clearfix row">
+        <div class="main pull-right col-md-9">
+          <div class="alert alert-success alert-sm text-center" ng-if="urlValid">Url
+            successfully validated
+          </div>
+          <div class="alert alert-danger alert-sm text-center" ng-if="urlInValid">Invalid Url
+          </div>
+        </div>
+      </div>
 		<hr class="none">
 		<div class="item clearfix row">
             <div class="col-md-9 pull-right">
@@ -50,7 +61,8 @@
         webviewPluginApp.controller("webviewPluginCtrl", ["$scope", "$log", "$timeout", function ($scope, $log, $timeout) {
             var dataChanged = false;
             $scope.datastoreInitialized = false;
-            $scope.urlValid = true;
+            $scope.urlValid = false;
+            $scope.urlInValid = false;
             /*
              * Go pull any previously saved data
              * */
@@ -97,16 +109,24 @@
                 }
 
                 if (!dataChanged) {
-                    console.warn("data didn't changed")
+                    console.warn("data didn't changed");
                     return;
                 }
                 var data = $scope.data;
                 // if the form has some invalid data do not save, in our case the user eneter invalid URL
                 if ($scope.frmMain.$invalid) {
-                    $log.warn('invalid data, details will not be saved');
-                    $scope.urlValid = false;
+                  $log.warn('invalid data, details will not be saved');
+                  $scope.urlValid = false;
+                  $scope.urlInValid = true;
+                  $timeout(function () {
+                    $scope.urlInValid = false;
+                  }, 3000);
                 } else {
-                    $scope.urlValid = true;
+                  $scope.urlValid = true;
+                  $scope.urlInValid = false;
+                  $timeout(function () {
+                    $scope.urlValid = false;
+                  }, 3000);
                     dataChanged = false;
                     if (!/^https?\:\/\//.test(data.content.url)) {
                         data.content.url = "http://" + data.content.url;
