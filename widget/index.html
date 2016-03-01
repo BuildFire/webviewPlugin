@@ -29,7 +29,7 @@
 <div class="scrollable">
     <iframe ng-src="{{ url }}" ng-if="data.content.openInApp"
             style="height:100%; width:1px; min-width:100%;"
-            scrolling="{{isWebPlateform ? 'no':'yes'}}"
+            scrolling="auto"
             iframe-onload="iframeLoadedCallBack()" id="webviewIframe"></iframe>
 </div>
 <script>
