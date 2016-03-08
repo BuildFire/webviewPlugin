@@ -24,6 +24,12 @@ webviewPluginApp.controller("webviewPluginCtrl", ["$scope", "$log", "$timeout", 
     if (result && result.data && !angular.equals({}, result.data)) {
       $scope.data = result.data;
       $scope.id = result.id;
+      if (typeof result.data.content.openInApp != 'undefined') {
+        if (result.data.content.openInApp)
+          $scope.data.content.view = $scope.viewType.NATIVE_IN_APP;
+        else
+          $scope.data.content.view = $scope.viewType.IN_APP_POPUP;
+      }
     } else {
       $scope.data = {
         content: {
