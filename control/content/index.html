@@ -1,165 +1,98 @@
 ﻿<!DOCTYPE html>
 <html ng-app="webviewPlugin">
 <head lang="en">
-    <meta charset="UTF-8">
-    <title>content</title>
-    <!-- CSS -->
-    <link href="../../../../styles/helper.css" rel="stylesheet">
-    <link href="../../../../styles/siteIcons.css" rel="stylesheet">
+  <meta charset="UTF-8">
+  <title>content</title>
+  <!-- CSS -->
+  <link href="../../../../styles/helper.css" rel="stylesheet">
+  <link href="../../../../styles/siteIcons.css" rel="stylesheet">
 
-    <!-- JS -->
-    <script src="../../../../scripts/buildfire.js"></script>
-    <script src="../../../../scripts/angular/angular.min.js"></script>
+  <!-- JS -->
+  <script src="../../../../scripts/buildfire.js"></script>
+  <script src="../../../../scripts/angular/angular.min.js"></script>
+  <script src="app.js"></script>
+  <style>
+    .radio-block {
+      display: block !important;
+      padding-bottom: 5px;
+    }
+  </style>
 </head>
-<body ng-controller="webviewPluginCtrl" id="webviewApp" ng-cloak ng-show="datastoreInitialized">
-    <div ng-form="frmMain">
+<body ng-controller="webviewPluginCtrl" id="webviewApp" ng-cloak
+      ng-show="datastoreInitialized">
+<div ng-form="frmMain">
 
-		<div class="item clearfix row margi
-		n-bottom-fifteen">
-            <div class="labels col-md-3 padding-right-zero pull-left">
-                <span>URL</span>
-            </div>
-			<div class="main col-md-9 pull-right clearfix">
-           	 	<div class="col-md-9 pull-left padding-left-zero">
-	                <input id="url" name="url" type="text" class="form-control" ng-model="data.content.url" required pattern="[-a-zA-Z0-9@:%_\+.~#?&amp;//=]{2,256}\.[a-z]{2,4}\b(\/[-a-zA-Z0-9@:%_\+.~#?!?\/?\w\/?&amp;//=]*)?">
-	            </div>
-	            <div class="col-md-3 pull-right padding-zero">
-	                <button class="btn btn-success stretch" ng-click="validateUrl()">
-	                    Validate
-	                </button>
-	            </div>
-			</div>
-        </div>
-<br>
-      <div class="item clearfix row">
-        <div class="main pull-right col-md-9">
-          <div class="alert alert-success alert-sm text-center" ng-if="urlValid">Url
-            successfully validated
-          </div>
-          <div class="alert alert-danger alert-sm text-center" ng-if="urlInValid">Invalid Url
-          </div>
-        </div>
-      </div>
-		<hr class="none">
-		<div class="item clearfix row">
-            <div class="col-md-9 pull-right">
-	            <div class="checkbox checkbox-primary margin-top-zero">
-                    <input id="checkboxid" type="checkbox" ng-checked="data.content.openInApp" ng-model="data.content.openInApp" ng-change="openMethodChanged()">
-                    <label for="checkboxid">Open URL in the app </label>
-                </div>
-				<br><br>
-        		<p class="info padding-zero">Note 1: For the best user experience, link to mobile optimized content. <br>(Disclaimer: Some websites will show mobile version of site only on mobile devices.)</p>
-        		<p class="info padding-zero">Note 2: If you are taking payments through this web page, you must open the the URL outside of the app or the app will get rejected by Apple in the submission review process.</p>
-        		<p class="info padding-zero">Hint: If you are taking payments, use your app or content DeepLink URL to redirect back to the app after a payment is made.</p>
-   			</div>
-		</div>
+  <div class="item clearfix row margin-bottom-fifteen">
+    <div class="labels col-md-3 padding-right-zero pull-left">
+      <span>URL</span>
     </div>
+    <div class="main col-md-9 pull-right clearfix">
+      <div class="col-md-9 pull-left padding-left-zero">
+        <input id="url" name="url" type="text" class="form-control"
+               ng-model="data.content.url" required
+               pattern="[-a-zA-Z0-9@:%_\+.~#?&amp;//=]{2,256}\.[a-z]{2,4}\b(\/[-a-zA-Z0-9@:%_\+.~#?!?\/?\w\/?&amp;//=]*)?">
+      </div>
+      <div class="col-md-3 pull-right padding-zero">
+        <button class="btn btn-success stretch" ng-click="validateUrl()"
+                ng-disabled="!data.content.url">
+          Validate
+        </button>
+      </div>
+    </div>
+  </div>
 
-    <script>
-        var webviewPluginApp = angular.module('webviewPlugin', []);
+  <div class="item clearfix row">
+    <div class="main pull-right col-md-9">
+      <div class="alert alert-success alert-sm text-center" ng-if="urlValid">Url
+        successfully validated
+      </div>
+      <div class="alert alert-danger alert-sm text-center" ng-if="urlInValid">
+        Invalid Url
+      </div>
+    </div>
+  </div>
+  <hr class="none">
+  <div class="item clearfix row">
+    <div class="col-md-9 pull-right">
+      <div class="radio radio-primary radio-block">
+        <input id="inapp" type="radio" ng-model="data.content.view"
+               ng-value="viewType.NATIVE_IN_APP"
+               name="viewType" ng-change="changeViewType()">
+        <label for="inapp">Native in app</label>
+      </div>
+      <div class="radio radio-primary radio-block">
+        <input id="popup" type="radio" ng-model="data.content.view"
+               ng-value="viewType.IN_APP_POPUP"
+               name="viewType" ng-change="changeViewType()">
+        <label for="popup">In app popup window</label>
+      </div>
+      <div class="radio radio-primary radio-block">
+        <input id="external" type="radio" ng-model="data.content.view"
+               ng-value="viewType.EXTERNAL_BROWSER"
+               name="viewType" ng-change="changeViewType()">
+        <label for="external">Device's default external browser</label>
+      </div>
+      <br>
 
-        webviewPluginApp.controller("webviewPluginCtrl", ["$scope", "$log", "$timeout", function ($scope, $log, $timeout) {
-            var dataChanged = false;
-            $scope.datastoreInitialized = false;
-            $scope.urlValid = false;
-            $scope.urlInValid = false;
-            /*
-             * Go pull any previously saved data
-             * */
-            buildfire.datastore.get(function (err, result) {
-                if (!err) {
-                    $scope.datastoreInitialized = true;
-                } else {
-                    console.error("Error: ", err);
-                    return;
-                }
+      <p class="info padding-zero">Note 1: For the best user experience, link to
+        mobile optimized content. <br>(Disclaimer: Some websites will show
+        mobile version of site only on mobile devices.)</p>
 
-                if (result && result.data && !angular.equals({}, result.data)) {
-                    $scope.data = result.data;
-                    $scope.id = result.id;
-                } else {
-                    $scope.data = {
-                        content: {
-                            url: "",
-                            openInApp: true
-                        }
-                    };
-                }
+      <p class="info padding-zero">Note 2: Certain websites like Google,
+        Amazon, and others have limitations and/or internal policies that
+        prohibit it from being shown in the app's native component.
+        Therefore, if your web page does not show up in this selection, please
+        try using one of the other two methods.</p>
 
-                /*
-                 * watch for changes in data
-                 * */
-                $scope.$watch('data', function (newObj, oldObj) {
-                    if (angular.equals(newObj, oldObj) || newObj == undefined) {
-                        dataChanged = false;
-                    } else {
-                        dataChanged = true;
-                    }
-                }, true);
+      <p class="info padding-zero">Note 3: If you are taking payments through
+        this web page, you must open the the URL outside of the app or the app
+        will get rejected by Apple in the submission review process.</p>
 
-                if (!$scope.$$phase && !$scope.$root.$$phase) {
-                    $scope.$apply();
-                }
-            });
-
-            $scope.saveData = function () {
-                if (!$scope.datastoreInitialized) {
-                    console.error("Error with datastore didn't get called");
-                    return;
-                }
-
-                if (!dataChanged) {
-                    console.warn("data didn't changed");
-                    return;
-                }
-                var data = $scope.data;
-                // if the form has some invalid data do not save, in our case the user eneter invalid URL
-                if ($scope.frmMain.$invalid) {
-                  $log.warn('invalid data, details will not be saved');
-                  $scope.urlValid = false;
-                  $scope.urlInValid = true;
-                  $timeout(function () {
-                    $scope.urlInValid = false;
-                  }, 3000);
-                } else {
-                  $scope.urlValid = true;
-                  $scope.urlInValid = false;
-                  $timeout(function () {
-                    $scope.urlValid = false;
-                  }, 3000);
-                    dataChanged = false;
-                    if (!/^https?\:\/\//.test(data.content.url)) {
-                        data.content.url = "http://" + data.content.url;
-                    }
-
-                    buildfire.datastore.save(data, function (err, result) {
-                        if (err || !result) {
-                            $log.error('Error saving the widget details: ', err);
-                        }
-                        else {
-                            $log.info('Widget details saved');
-                        }
-                    });
-                }
-            };
-
-            $scope.validateUrl = function () {
-                $scope.saveData();
-            };
-
-            $scope.openMethodChanged = function () {
-                dataChanged = true;
-                buildfire.datastore.save($scope.data, function (err, result) {
-                    if (err || !result) {
-                        $log.error('Error saving the widget details: ', err);
-                    }
-                    else {
-                        $log.info('Widget details saved');
-                    }
-                });
-            }
-        }]);
-    </script>
+      <p class="info padding-zero">Hint: If you are taking payments, use your
+        app or content DeepLink URL to redirect back to the app after a payment
+        is made.</p>
+    </div>
+  </div>
+</div>
 </body>
-
 </html>
