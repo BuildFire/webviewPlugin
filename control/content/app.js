@@ -83,7 +83,8 @@ webviewPluginApp.controller("webviewPluginCtrl", ["$scope", "$log", "$timeout", 
       if (!/^https?\:\/\//.test(data.content.url)) {
         data.content.url = "http://" + data.content.url;
       }
-
+      if (data.content.openInApp != 'undefined')
+        data.content.openInApp = null;
       buildfire.datastore.save(data, function (err, result) {
         if (err || !result) {
           $log.error('Error saving the widget details: ', err);
@@ -103,6 +104,8 @@ webviewPluginApp.controller("webviewPluginCtrl", ["$scope", "$log", "$timeout", 
     dataChanged = true;
     if (!$scope.frmMain.$invalid) {
       var data = $scope.data;
+      if (data.content.openInApp != 'undefined')
+        data.content.openInApp = null;
       buildfire.datastore.save(data, function (err, result) {
         if (err || !result) {
           $log.error('Error saving the widget details: ', err);
