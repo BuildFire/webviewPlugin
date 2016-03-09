@@ -26,12 +26,22 @@
   </style>
 </head>
 <body class="no-scroll" ng-controller="webviewPluginCtrl" ng-cloak>
-<div class="scrollable">
+<div class="scrollable" ng-if="(data.content.view == 'Native In App') || data.content.openInApp">
   <iframe ng-src="{{ url }}"
-          ng-if="(data.content.view == 'Native In App') || data.content.openInApp"
           style="height:100%; width:1px; min-width:100%;"
           scrolling="auto"
           iframe-onload="iframeLoadedCallBack()" id="webviewIframe"></iframe>
+</div>
+<div style="text-align: center;vertical-align: middle; height: 100%"
+     ng-if="isWebPlateform && ((data.content.view != 'Native In App') || !data.content.openInApp)">
+  <h3 style="margin-top: 50%; opacity: .25;"></h3>
+
+  <div>
+    <h2>Success!</h2>
+
+    <p>Your web page has been linked and will show in your app. To view your
+      web page now click <a href="{{url}}" target="_blank">here</a></p>
+  </div>
 </div>
 <script>
   var webviewPluginApp = angular.module('webviewPlugin', []);
@@ -70,11 +80,6 @@
                   buildfire.navigation.openWindow(content.url, "_system");
                 buildfire.navigation.goBack();
               }
-              else
-                buildfire.navigation.openWindow(content.url, "_blank");
-            }
-            else if (typeof content.openInApp != 'undefined' && !content.openInApp) {
-              buildfire.navigation.openWindow(content.url, "_blank");
             }
             if (!$scope.$$phase && !$scope.$root.$$phase) {
               $scope.$apply();
