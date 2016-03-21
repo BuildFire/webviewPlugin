@@ -21,7 +21,8 @@ webviewPluginApp.controller("webviewPluginCtrl", ["$scope", "$log", "$timeout", 
       return;
     }
 
-    if (result && result.data && !angular.equals({}, result.data)) {
+    if (result && result.data && !angular.equals({}, result.data) && result.id) {
+      console.log("***********init", result);
       $scope.data = result.data;
       $scope.id = result.id;
       if (typeof result.data.content.openInApp != 'undefined') {
@@ -33,7 +34,7 @@ webviewPluginApp.controller("webviewPluginCtrl", ["$scope", "$log", "$timeout", 
     } else {
       $scope.data = {
         content: {
-          url: "",
+          url: "http://hellacompany.com/",
           view: $scope.viewType.NATIVE_IN_APP
         }
       };
@@ -127,5 +128,5 @@ webviewPluginApp.controller("webviewPluginCtrl", ["$scope", "$log", "$timeout", 
         $log.info('Widget details saved');
       }
     });
-  }
+  };
 }]);
