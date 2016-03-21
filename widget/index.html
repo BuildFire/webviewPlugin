@@ -65,8 +65,8 @@
 
     function dataLoadedHandler(result) {
       var content = null;
+      console.log("________________", result);
       if (result && result.data && !angular.equals({}, result.data)) {
-        console.log("________________", result);
         if (result.data.content) {
           content = result.data.content;
           $scope.data = result.data;
