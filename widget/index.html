@@ -26,7 +26,8 @@
   </style>
 </head>
 <body class="no-scroll" ng-controller="webviewPluginCtrl" ng-cloak>
-<div class="scrollable" ng-if="(data.content.view == 'Native In App') || data.content.openInApp">
+<div class="scrollable"
+     ng-if="(data.content.view == 'Native In App') || data.content.openInApp">
   <iframe ng-src="{{ url }}"
           style="height:100%; width:1px; min-width:100%;"
           scrolling="auto"
@@ -64,6 +65,7 @@
 
     function dataLoadedHandler(result) {
       var content = null;
+      console.log("________________", result);
       if (result && result.data && !angular.equals({}, result.data)) {
         if (result.data.content) {
           content = result.data.content;
@@ -86,6 +88,21 @@
             }
             buildfire.spinner.hide();
           });
+        }
+      } else {
+        content = {
+          view: "Native In App",
+          url: "http://hellacompany.com/"
+        };
+        $scope.data = {
+          content: {
+            view: "Native In App",
+            url: "http://hellacompany.com/"
+          }
+        };
+        $scope.url = $sce.trustAsResourceUrl(content.url);
+        if (!$scope.$$phase && !$scope.$root.$$phase) {
+          $scope.$apply();
         }
       }
     }

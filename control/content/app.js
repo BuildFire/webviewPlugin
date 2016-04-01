@@ -20,11 +20,10 @@ webviewPluginApp.controller("webviewPluginCtrl", ["$scope", "$log", "$timeout", 
       console.error("Error: ", err);
       return;
     }
-
-    if (result && result.data && !angular.equals({}, result.data)) {
+    if (result && result.data && !angular.equals({}, result.data) && result.id) {
       $scope.data = result.data;
       $scope.id = result.id;
-      if (typeof result.data.content.openInApp != 'undefined') {
+      if (typeof result.data.content.openInApp != 'undefined' && typeof result.data.content.openInApp != 'object') {
         if (result.data.content.openInApp)
           $scope.data.content.view = $scope.viewType.NATIVE_IN_APP;
         else
@@ -33,7 +32,7 @@ webviewPluginApp.controller("webviewPluginCtrl", ["$scope", "$log", "$timeout", 
     } else {
       $scope.data = {
         content: {
-          url: "",
+          url: "http://hellacompany.com/",
           view: $scope.viewType.NATIVE_IN_APP
         }
       };
@@ -83,7 +82,8 @@ webviewPluginApp.controller("webviewPluginCtrl", ["$scope", "$log", "$timeout", 
       if (!/^https?\:\/\//.test(data.content.url)) {
         data.content.url = "http://" + data.content.url;
       }
-      if (data.content.openInApp != 'undefined')
+
+      if (data.content.openInApp != undefined)
         data.content.openInApp = null;
       buildfire.datastore.save(data, function (err, result) {
         if (err || !result) {
@@ -104,8 +104,10 @@ webviewPluginApp.controller("webviewPluginCtrl", ["$scope", "$log", "$timeout", 
     dataChanged = true;
     if (!$scope.frmMain.$invalid) {
       var data = $scope.data;
-      if (data.content.openInApp != 'undefined')
+      console.log("***********save", data.content.openInApp);
+      if (data.content.openInApp != undefined) {
         data.content.openInApp = null;
+      }
       buildfire.datastore.save(data, function (err, result) {
         if (err || !result) {
           $log.error('Error saving the widget details: ', err);
@@ -127,5 +129,5 @@ webviewPluginApp.controller("webviewPluginCtrl", ["$scope", "$log", "$timeout", 
         $log.info('Widget details saved');
       }
     });
-  }
+  };
 }]);
