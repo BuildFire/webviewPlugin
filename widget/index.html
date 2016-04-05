@@ -136,6 +136,8 @@
           oldUrl = history.pop();
       }
       catch (e) {
+        buildfire.navigation.restoreBackButtonClick();
+        buildfire.navigation.goBack();
         console.warn(e);
         // most likely cross domain access failure
       }
