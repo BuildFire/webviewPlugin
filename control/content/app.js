@@ -32,7 +32,7 @@ webviewPluginApp.controller("webviewPluginCtrl", ["$scope", "$log", "$timeout", 
     } else {
       $scope.data = {
         content: {
-          url: "http://hellacompany.com/",
+          url: "",
           view: $scope.viewType.NATIVE_IN_APP
         }
       };
