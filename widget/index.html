@@ -128,8 +128,8 @@
 
 
     buildfire.navigation.onBackButtonClick = function () {
-
-      var oldUrl = history.pop();
+      buildfire.navigation._goBackOne();
+   /*   var oldUrl = history.pop();
       var webviewIframe = document.getElementById("webviewIframe");
       try {
         if (webviewIframe && oldUrl == webviewIframe.contentWindow.location.href)
@@ -147,7 +147,7 @@
       } else {
         buildfire.navigation.restoreBackButtonClick();
         buildfire.navigation.goBack();
-      }
+      }*/
     };
 
     $scope.iframeLoadedCallBack = function () {
