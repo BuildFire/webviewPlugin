@@ -28,6 +28,7 @@
 <body class="no-scroll" ng-controller="webviewPluginCtrl" ng-cloak>
 <div class="scrollable"
      ng-if="(data.content.view == 'Native In App') || data.content.openInApp">
+ <p ng-if="loading" style="position: absolute; top: 0; display: inline-block; width: 100%; left: 0; background: #eee; text-align: center; color: #333;">Loading....</p>
   <iframe ng-src="{{ url }}"
           style="height:100%; width:1px; min-width:100%;"
           scrolling="auto"
@@ -61,10 +62,10 @@
   }]);
 
   webviewPluginApp.controller('webviewPluginCtrl', ["$scope", "$sce", function ($scope, $sce) {
-    buildfire.spinner.show();
-
     function dataLoadedHandler(result) {
       var content = null;
+        $scope.loading = 1;
+        buildfire.spinner.show();
       console.log("________________", result);
       if (result && result.data && !angular.equals({}, result.data)) {
         if (result.data.content) {
@@ -128,8 +129,8 @@
 
 
     buildfire.navigation.onBackButtonClick = function () {
-
-      var oldUrl = history.pop();
+      buildfire.navigation._goBackOne();
+   /*   var oldUrl = history.pop();
       var webviewIframe = document.getElementById("webviewIframe");
       try {
         if (webviewIframe && oldUrl == webviewIframe.contentWindow.location.href)
@@ -147,10 +148,12 @@
       } else {
         buildfire.navigation.restoreBackButtonClick();
         buildfire.navigation.goBack();
-      }
+      }*/
     };
 
     $scope.iframeLoadedCallBack = function () {
+      $scope.loading = 0
+      $scope.$apply();
       var webviewIframe = document.getElementById("webviewIframe");
       buildfire.spinner.hide();
       if (!isBackClicked) {
@@ -178,6 +181,7 @@
 
     buildfire.datastore.onUpdate(function (result) {
       dataLoadedHandler(result);
+        $scope.loading = 0
     });
   }]);
 </script>
