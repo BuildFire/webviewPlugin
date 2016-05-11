@@ -31,7 +31,7 @@
  <p ng-if="loading" style="position: absolute; top: 0; display: inline-block; width: 100%; left: 0; background: #eee; text-align: center; color: #333;">Loading....</p>
   <iframe ng-src="{{ url }}"
           style="height:100%; width:1px; min-width:100%;"
-          scrolling="auto"
+          scrolling="{{isIOS ? 'no' : 'auto'}}"
           iframe-onload="iframeLoadedCallBack()" id="webviewIframe"></iframe>
 </div>
 <div style="text-align: center;vertical-align: middle; height: 100%"
@@ -67,6 +67,7 @@
         $scope.loading = 1;
         buildfire.spinner.show();
       console.log("________________", result);
+      $scope.isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
       if (result && result.data && !angular.equals({}, result.data)) {
         if (result.data.content) {
           content = result.data.content;
