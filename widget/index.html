@@ -26,13 +26,9 @@
   </style>
 </head>
 <body class="no-scroll" ng-controller="webviewPluginCtrl" ng-cloak>
-<div class="scrollable"
-     ng-if="(data.content.view == 'Native In App') || data.content.openInApp">
- <p ng-if="loading" style="position: absolute; top: 0; display: inline-block; width: 100%; left: 0; background: #eee; text-align: center; color: #333;">Loading....</p>
-  <iframe ng-src="{{ url }}"
-          style="height:100%; width:1px; min-width:100%;"
-          scrolling="auto"
-          iframe-onload="iframeLoadedCallBack()" id="webviewIframe"></iframe>
+<div class="scrollable" ng-if="(data.content.view == 'Native In App') || data.content.openInApp">
+ <p ng-if="loading" class="bodyTextTheme backgroundColorTheme" style="position: absolute; top: 0; padding:8px 0; display: inline-block; width: 100%; left: 0; background: #eef0f0; text-align: center; color: #5f5f5f;">Loading...</p>
+  <iframe ng-src="{{ url }}" style="height:100%; width:1px; min-width:100%;" scrolling="auto" iframe-onload="iframeLoadedCallBack()" id="webviewIframe"></iframe>
 </div>
 <div style="text-align: center;vertical-align: middle; height: 100%"
      ng-if="isWebPlateform && ((data.content.view != 'Native In App') || !data.content.openInApp)">
