@@ -20,7 +20,7 @@
 
   },
   "features":[
-
+    {"name" : "Geo"}
    ],
    "languages":[
       "en"
