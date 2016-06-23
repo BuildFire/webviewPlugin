@@ -130,4 +130,8 @@ webviewPluginApp.controller("webviewPluginCtrl", ["$scope", "$log", "$timeout", 
       }
     });
   };
+
+  $scope.isUrlValid = function (url) {
+    return /[-a-zA-Z0-9@:%_\+.~#?&amp;//=]{2,256}\.[a-z]{2,6}\b(\/[-a-zA-Z0-9@:%_\+.~#?!?\/?\w\/?&amp;//=]*)?/.test(url);
+  };
 }]);

@@ -29,8 +29,7 @@
     <div class="main col-md-9 pull-right clearfix">
       <div class="col-md-9 pull-left padding-left-zero">
         <input id="url" name="url" type="text" class="form-control"
-               ng-model="data.content.url" required
-               pattern="[-a-zA-Z0-9@:%_\+.~#?&amp;//=]{2,256}\.[a-z]{2,6}\b(\/[-a-zA-Z0-9@:%_\+.~#?!?\/?\w\/?&amp;//=]*)?">
+               ng-model="data.content.url">
       </div>
       <div class="col-md-3 pull-right padding-zero">
         <button class="btn btn-success stretch" ng-click="validateUrl()"
@@ -38,6 +37,19 @@
           Validate
         </button>
       </div>
+    </div>
+  </div>
+
+  <div class="item clearfix row"
+       ng-if="data.content.url && !isUrlValid(data.content.url)">
+    <div class="main pull-right col-md-9">
+      <p style="color: #ff7164">Seems like
+        your url is not valid ! But if you
+        want,
+        you can
+        still
+        add it
+        to your plugin.</p>
     </div>
   </div>
 
