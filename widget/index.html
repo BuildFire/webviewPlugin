@@ -57,7 +57,7 @@
     }
   }]);
 
-  webviewPluginApp.controller('webviewPluginCtrl', ["$scope", "$sce", function ($scope, $sce) {
+  webviewPluginApp.controller('webviewPluginCtrl', ["$scope", "$sce", "$timeout", function ($scope, $sce, $timeout) {
     function dataLoadedHandler(result) {
       var content = null;
         $scope.loading = 1;
@@ -78,7 +78,10 @@
                   buildfire.navigation.openWindow(content.url, "_blank");
                 else
                   buildfire.navigation.openWindow(content.url, "_system");
-                buildfire.navigation.goBack();
+
+                  $timeout(function () {
+                      buildfire.navigation.goBack();
+                  }, 200);
               }
             }
             if (!$scope.$$phase && !$scope.$root.$$phase) {
