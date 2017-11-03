@@ -26,15 +26,12 @@
   </style>
 </head>
 <body class="no-scroll" ng-controller="webviewPluginCtrl" ng-cloak>
-<div class="scrollable" ng-if="(data.content.view == 'Native In App') || data.content.openInApp">
+<div class="scrollable" ng-if="isLiveMode && isiFrame">
  <p ng-if="loading" class="bodyTextTheme backgroundColorTheme" style="position: absolute; top: 0; padding:8px 0; display: inline-block; width: 100%; left: 0; background: #eef0f0; text-align: center; color: #5f5f5f;">Loading...</p>
   <iframe ng-src="{{ url }}" style="height:100%; width:1px; min-width:100%;" scrolling="{{isIOS ? 'no' : 'auto'}}" iframe-onload="iframeLoadedCallBack()" id="webviewIframe"></iframe>
 </div>
-<div style="text-align: center;vertical-align: middle; height: 100%"
-     ng-if="isWebPlateform && ((data.content.view != 'Native In App') || !data.content.openInApp)">
-  <h3 style="margin-top: 50%; opacity: .25;"></h3>
-
-  <div>
+<div style="text-align: center;vertical-align: middle; height: 100%" ng-if="!isLiveMode && url">
+  <div style="margin-top: 50%;">
     <h2>Success!</h2>
 
     <p>Your web page has been linked and will show in your app. To view your
@@ -67,22 +64,27 @@
       if (result && result.data && !angular.equals({}, result.data)) {
         if (result.data.content) {
           content = result.data.content;
+          $scope.isiFrame = content.view == 'Native In App';
           $scope.data = result.data;
+
+          if(!result.data.content.url){
+              $scope.isiFrame = false;
+              return;
+          }
+
           $scope.url = $sce.trustAsResourceUrl(content.url);
           buildfire.getContext(function (err, context) {
-            $scope.isWebPlateform = (context.device.platform == "web");
-            if (content.view && content.view != 'Native In App' &&
-                content.url) {
-              if (context.device.platform != "web") {
-                if (content.view == 'In app popup')
-                  buildfire.navigation.openWindow(content.url, "_blank");
-                else
-                  buildfire.navigation.openWindow(content.url, "_system");
+              console.error('buildfire.context.liveMode', buildfire.context.liveMode);
+            $scope.isLiveMode = buildfire.context.liveMode;
+            if ($scope.isLiveMode && !$scope.isiFrame) {
+              if (content.view == 'In app popup')
+                buildfire.navigation.openWindow(content.url, "_blank");
+              else
+                buildfire.navigation.openWindow(content.url, "_system");
 
-                  $timeout(function () {
-                      buildfire.navigation.goBack();
-                  }, 200);
-              }
+                $timeout(function () {
+                    buildfire.navigation.goBack();
+                }, 750);
             }
             if (!$scope.$$phase && !$scope.$root.$$phase) {
               $scope.$apply();
@@ -130,25 +132,6 @@
 
     buildfire.navigation.onBackButtonClick = function () {
       buildfire.navigation._goBackOne();
-   /*   var oldUrl = history.pop();
-      var webviewIframe = document.getElementById("webviewIframe");
-      try {
-        if (webviewIframe && oldUrl == webviewIframe.contentWindow.location.href)
-          oldUrl = history.pop();
-      }
-      catch (e) {
-        buildfire.navigation.restoreBackButtonClick();
-        buildfire.navigation.goBack();
-        console.warn(e);
-        // most likely cross domain access failure
-      }
-      if (webviewIframe && oldUrl) {
-        isBackClicked = true;
-        webviewIframe.src = oldUrl;
-      } else {
-        buildfire.navigation.restoreBackButtonClick();
-        buildfire.navigation.goBack();
-      }*/
     };
 
     $scope.iframeLoadedCallBack = function () {
