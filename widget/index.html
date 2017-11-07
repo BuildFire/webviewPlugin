@@ -65,7 +65,7 @@
         if (result.data.content) {
           content = result.data.content;
           $scope.isiFrame = content.view == 'Native In App';
-          $scope.isWeb = (context.device.platform == "web");
+          $scope.isWeb = (buildfire.context.device.platform == "web");
           $scope.data = result.data;
 
           if(!result.data.content.url){
