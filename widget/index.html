@@ -69,8 +69,20 @@
           $scope.data = result.data;
 
           if(!result.data.content.url){
-              $scope.isiFrame = false;
-              return;
+            $scope.isiFrame = false;
+            return;
+          }
+          // pass enterprise SSO authentication
+          if(content.url && content.url.indexOf('{{SSO}}') > 0) {
+            var ssoLocalStorageItem = window.localStorage.getItem("SSO_USER");
+            if (ssoLocalStorageItem) {
+              var ssoUserObj = JSON.parse(ssoLocalStorageItem);
+              if (ssoUserObj.ssoUserToken) {
+                content.url =  content.url.replace('{{SSO}}', decodeURIComponent(ssoUserObj.ssoUserToken));
+              }
+            } else {
+              content.url =  content.url.replace('{{SSO}}', '');
+            }
           }
 
           $scope.url = $sce.trustAsResourceUrl(content.url);
