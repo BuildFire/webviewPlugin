@@ -87,7 +87,6 @@
 
           $scope.url = $sce.trustAsResourceUrl(content.url);
           buildfire.getContext(function (err, context) {
-              console.error('buildfire.context.liveMode', buildfire.context.liveMode);
             $scope.isLiveMode = buildfire.context.liveMode;
             if (($scope.isLiveMode || !$scope.isWeb) && !$scope.isiFrame) {
               if (content.view == 'In app popup')
