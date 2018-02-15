@@ -1,36 +1,31 @@
 {
-  "name": "webviewPlugin",
+  "name": "plugin-template-webpack",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "BuildFire plugin template for Webpack",
+  "main": "server.js",
   "scripts": {
-    "postinstall": "./node_modules/.bin/bower install",
-    "test": "./node_modules/.bin/karma start karma.conf.js"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack --config ./webpack/build.config.js"
   },
-  "dependencies": {
-    "bower": "^1.5.3",
-    "karma-cli": "^0.1.0"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/BuildFire/webviewPlugin.git"
-  },
-  "author": "Daniel Hindi",
-  "license": "ISC",
+  "keywords": [
+    "buildfire",
+    "plugin",
+    "webpack"
+  ],
+  "author": "BuildFire",
+  "license": "MIT",
   "devDependencies": {
-    "chai": "^3.3.0",
-    "jasmine-core": "^2.3.4",
-    "karma": "^0.13.10",
-    "karma-chai": "^0.1.0",
-    "karma-jasmine": "^0.3.6",
-    "karma-coverage": "^0.5.1",
-    "karma-chrome-launcher": "^0.2.1",
-    "karma-firefox-launcher": "^0.1.6",
-    "karma-ie-launcher": "^0.2.0",
-    "karma-mocha": "^0.2.0",
-    "karma-safari-launcher": "^0.1.1",
-    "karma-phantomjs-launcher": "^0.2.1",
-    "mocha": "^2.3.3",
-    "phantomjs": "^1.9.17"
+    "@babel/core": "^7.0.0-beta.40",
+    "@babel/preset-env": "^7.0.0-beta.40",
+    "babel-loader": "^8.0.0-beta.0",
+    "copy-webpack-plugin": "^4.1.1",
+    "css-loader": "^0.28.9",
+    "eslint": "^4.9.0",
+    "extract-text-webpack-plugin": "^3.0.2",
+    "html-webpack-plugin": "^2.30.1",
+    "style-loader": "^0.20.1",
+    "webpack": "^3.11.0",
+    "webpack-dev-server": "^2.9.2",
+    "zip-webpack-plugin": "^2.0.0"
   }
 }
