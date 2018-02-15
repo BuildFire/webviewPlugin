@@ -4,41 +4,32 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<!-- JS -->
 	<script src="../../../scripts/buildfire.js"></script>
-</head>
-<body>
   <style>
-      div.link-verified {
-        margin: 0;
-        position: absolute;
-        top: 50%;
-        height: 120px;
-        margin-top: -75px;
-        width: 100%;
-      }
+    div.link-verified {
+      margin: 0;
+      position: absolute;
+      top: 50%;
+      height: 120px;
+      margin-top: -75px;
+      width: 100%;
+    }
 
-      div.link-verified .glyphicon {
-        border: 2px solid;
-        padding: 10px;
-        border-radius: 50%;
-        margin-bottom: 20px;
-      }
-    </style>
+    div.link-verified .glyphicon {
+      border: 2px solid;
+      padding: 10px;
+      border-radius: 50%;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
 <body class="no-scroll">
-
-<!--
-  <div class="scrollable">
-    <p class="bodyTextTheme backgroundColorTheme" style="position: absolute; top: 0; padding:8px 0; display: inline-block; width: 100%; left: 0; background: #eef0f0; text-align: center; color: #5f5f5f;">Loading...</p>
-
-    <iframe ng-src="{{ url }}" style="height:100%; width:1px; min-width:100%;" scrolling="{{isIOS ? 'no' : 'auto'}}" iframe-onload="iframeLoadedCallBack()" id="webviewIframe"></iframe>
-  </div>
--->
 
   <div style="text-align: center;vertical-align: middle; height: 100%; display: none" id="successMessage">
     <div style="margin-top: 50%;">
       <h2>Success!</h2>
 
       <p>Your web page has been linked and will show in your app. To view your
-        web page now click <a href="{{url}}" target="_blank">here</a></p>
+        web page now click <a id="targetUrl" href="#" target="_blank">here</a></p>
     </div>
   </div>
 

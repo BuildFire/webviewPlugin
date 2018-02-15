@@ -1,4 +1,5 @@
 const buildfire = require('buildfire');
+const { formatSSO } = require('./formatSSO');
 
 const viewOptions = {
   POPUP: 'In app popup',
@@ -13,8 +14,8 @@ const setFlags = (content) => {
   flags.shouldOpenInApp = (content.view == viewOptions.NATIVE);
   flags.isNotCP = (flags.isLiveMode || !flags.isWeb);
   flags.isLiveMode = buildfire.context.liveMode;
+  flags.requiresSSO = content.url && content.url.indexOf('{{SSO}}') > 0;
   flags.isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-  flags.requiresSso = (content.url.indexOf('{{SSO}}') > 0);
 };
 
 //.view
@@ -22,11 +23,16 @@ const setFlags = (content) => {
 const render = (content) => {
   const displayIniFrame = flags.isNotCP && flags.shouldOpenInApp;
   const openWindow = flags.isNotCP && !flags.shouldOpenInApp;
-  const displaySucessMessage = flags.isWeb && !flags.isLiveMode && content.url;
+  const displaySuccessMessage = flags.isWeb && !flags.isLiveMode && content.url;
 
   if(displayIniFrame){
     renderiFrame({url: content.url, isIOS: flags.isIOS});
     return;
+  }
+
+  if (flags.requiresSSO) {
+    const ssoLocalStorageItem = window.localStorage.getItem('SSO_USER');
+    content.url = formatSSO(content.url, ssoLocalStorageItem);
   }
 
   if(openWindow){
@@ -37,30 +43,52 @@ const render = (content) => {
     return;
   }
 
-  if(displaySucessMessage){
+  if(displaySuccessMessage){
     window.document.getElementById('successMessage').style.display = 'block';
+    window.document.getElementById('targetUrl').href = content.url;
     return;
   }
 };
 
 const renderiFrame = (props) =>{
-  let appArea = window.document.getElementById('appArea');
-  appArea.style.display = 'block';
+  let currentIframe = window.document.getElementById('webviewIframe');
+  if (currentIframe) {
+    currentIframe.remove();
+  }
+  window.document.body.appendChild((() => {
+    let p = window.document.createElement('p');
+    p.innerHTML = 'Loading...';
+    p.className = 'bodyTextTheme backgroundColorTheme';
+    p.style.position = 'absolute';
+    p.style.top = 0;
+    p.style.padding = '8px 0';
+    p.style.display = 'inline-block';
+    p.style.width = '100%';
+    p.style.left= 0;
+    p.style.background = '#eef0f0';
+    p.style.textAlign = 'center';
+    p.style.color = '#5f5f5f';
+    p.id = 'loadingText';
+    return p;
+  })());
 
-  let iFrame = window.document.createElement('iframe');
-  iFrame.id = 'webviewIframe';
-  iFrame.src = props.url;
-  iFrame.scrolling = props.isIOS ? 'no' : 'auto';
-  iFrame.style.height = '100%';
-  iFrame.style.width = '1px';
-  iFrame.style.minWidth = '100%';
-  iFrame.onload = ()=>{};
-
-  appArea.appenChild(iFrame);
+  window.document.body.appendChild((() => {
+    let iFrame = window.document.createElement('iframe');
+    iFrame.id = 'webviewIframe';
+    iFrame.src = props.url;
+    iFrame.scrolling = props.isIOS ? 'no' : 'auto';
+    iFrame.style.height = '100%';
+    iFrame.style.width = '1px';
+    iFrame.style.minWidth = '100%';
+    iFrame.onload = () => {
+      window.document.getElementById('loadingText').remove();
+    };
+    return iFrame;
+  })());
 };
 
 buildfire.spinner.show();
-
+buildfire.datastore.onUpdate(event => render(event.data.content));
 buildfire.datastore.get((err, result) => {
   if (err) {
     console.error("error: ", err);
