@@ -18,12 +18,11 @@ const setFlags = (content) => {
   flags.isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 };
 
-//.view
-//.url
 const render = (content) => {
+  setFlags(content);
   const displayIniFrame = flags.isNotCP && flags.shouldOpenInApp;
   const openWindow = flags.isNotCP && !flags.shouldOpenInApp;
-  const displaySuccessMessage = flags.isWeb && !flags.isLiveMode && content.url;
+  const displaySuccessMessage = content.url && flags.isWeb && !flags.isLiveMode;
 
   if(displayIniFrame){
     renderiFrame({url: content.url, isIOS: flags.isIOS});
@@ -103,7 +102,6 @@ buildfire.datastore.get((err, result) => {
 
   const { content } = result.data;
 
-  setFlags(content);
   render(content);
 
   buildfire.spinner.hide();
