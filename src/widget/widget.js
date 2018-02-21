@@ -54,6 +54,18 @@ const renderiFrame = (props) =>{
   if (currentIframe) {
     currentIframe.remove();
   }
+
+  let scrollable = window.document.getElementById('scrollable');
+  if (!scrollable && props.isIOS) {
+    window.document.body.appendChild((() => {
+      let div = document.createElement('div');
+      div.id = 'scrollable';
+      div.className = 'scrollable';
+      scrollable = div;
+      return div;
+    })());
+  }
+
   window.document.body.appendChild((() => {
     let p = window.document.createElement('p');
     p.innerHTML = 'Loading...';
@@ -71,7 +83,9 @@ const renderiFrame = (props) =>{
     return p;
   })());
 
-  window.document.body.appendChild((() => {
+  let container = props.isIOS ? scrollable : window.document.body;
+
+  container.appendChild((() => {
     let iFrame = window.document.createElement('iframe');
     iFrame.id = 'webviewIframe';
     iFrame.src = props.url;
