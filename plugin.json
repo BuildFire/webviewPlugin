@@ -23,5 +23,6 @@
    ],
    "languages":[
       "en"
-   ]
+   ],
+  "webpack": 8080
 }
