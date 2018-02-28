@@ -39,6 +39,8 @@ const render = (content) => {
       buildfire.navigation.openWindow(content.url, "_blank");
     else
       buildfire.navigation.openWindow(content.url, "_system");
+
+    setTimeout(() => buildfire.navigation.goBack(), 750);
     return;
   }
 
