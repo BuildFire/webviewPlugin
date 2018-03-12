@@ -121,4 +121,10 @@ buildfire.datastore.get((err, result) => {
   render(content);
 
   buildfire.spinner.hide();
+
+  try {
+    buildfire.appearance.ready();
+  } catch (err) {
+    console.log('appearance.ready() failed. Is sdk up to date?');
+  }
 });
