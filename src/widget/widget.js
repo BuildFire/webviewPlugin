@@ -50,7 +50,6 @@ const render = (content) => {
     buildfire.auth.getCurrentUser((err, result) => {
       if (result && result.SSO && result.SSO.accessToken) {
         content.url = formatSSO(content.url, JSON.stringify(result.SSO));
-        window.document.getElementById('targetUrl').href = content.url;  //to display the URL in the CP
         handleWindow(openWindow, displayIniFrame, displaySuccessMessage);
       }
     });
