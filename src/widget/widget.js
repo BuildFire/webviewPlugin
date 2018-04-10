@@ -19,40 +19,45 @@ const setFlags = (content) => {
 };
 
 const render = (content) => {
+
+  const handleWindow = (openWindow, displayIniFrame, displaySuccessMessage) => {
+    if(openWindow){
+      if(content.view === viewOptions.POPUP)
+        buildfire.navigation.openWindow(content.url, "_blank");
+      else
+        buildfire.navigation.openWindow(content.url, "_system");
+
+      setTimeout(() => buildfire.navigation.goBack(), 750);
+      return;
+    }
+    if(displayIniFrame){
+      renderiFrame({url: content.url, isIOS: flags.isIOS});
+      return;
+    }
+    if(displaySuccessMessage){
+      window.document.getElementById('successMessage').style.display = 'block';
+      window.document.getElementById('targetUrl').href = content.url;
+      return;
+    }
+  };
+
   setFlags(content);
-  const displayIniFrame = flags.isNotCP && flags.shouldOpenInApp;
-  const openWindow = flags.isNotCP && !flags.shouldOpenInApp;
+  const displayIniFrame = flags.isNotCP && flags.shouldOpenInApp;  //on the device and open native
+  const openWindow = flags.isNotCP && !flags.shouldOpenInApp;      //on the device and open in pop up or native brow
   const displaySuccessMessage = content.url && flags.isWeb && !flags.isLiveMode;
 
-  if(displayIniFrame){
-    renderiFrame({url: content.url, isIOS: flags.isIOS});
-    return;
-  }
-
-  if (flags.requiresSSO) {
+  if (flags.requiresSSO) {   //This is an SSO webview with an access token
     buildfire.auth.getCurrentUser((err, result) => {
       if (result && result.SSO && result.SSO.accessToken) {
         content.url = formatSSO(content.url, JSON.stringify(result.SSO));
-        window.document.getElementById('targetUrl').href = content.url;
+        window.document.getElementById('targetUrl').href = content.url;  //to display the URL in the CP
+        handleWindow(openWindow, displayIniFrame, displaySuccessMessage);
       }
     });
+  } else {   //this is all other URLs, i.e. no SSO.
+    handleWindow(openWindow, displayIniFrame, displaySuccessMessage);
   }
 
-  if(openWindow){
-    if(content.view === viewOptions.POPUP)
-      buildfire.navigation.openWindow(content.url, "_blank");
-    else
-      buildfire.navigation.openWindow(content.url, "_system");
-
-    setTimeout(() => buildfire.navigation.goBack(), 750);
-    return;
-  }
-
-  if(displaySuccessMessage){
-    window.document.getElementById('successMessage').style.display = 'block';
-    window.document.getElementById('targetUrl').href = content.url;
-    return;
-  }
 };
 
 const renderiFrame = (props) =>{
