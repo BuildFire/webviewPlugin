@@ -30,8 +30,12 @@ const render = (content) => {
   }
 
   if (flags.requiresSSO) {
-    const ssoLocalStorageItem = window.localStorage.getItem('SSO_USER');
-    content.url = formatSSO(content.url, ssoLocalStorageItem);
+    buildfire.auth.getCurrentUser((err, result) => {
+      if (result && result.SSO && result.SSO.accessToken) {
+        content.url = formatSSO(content.url, JSON.stringify(result.SSO));
+        window.document.getElementById('targetUrl').href = content.url;
+      }
+    });
   }
 
   if(openWindow){
