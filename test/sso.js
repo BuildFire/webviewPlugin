@@ -6,7 +6,7 @@ describe('SSO Format Function', () => {
   const URL = 'https://test.com/';
 
   it('should return url with token', () => {
-      let ssoUser = '{ "ssoUserToken": "123" }';
+      let ssoUser = '{ "accessToken": "123" }';
       let url = formatSSO(`${URL}?token={{SSO}}`, ssoUser);
       expect(url).to.be.a('string');
       expect(url).to.equal(`${URL}?token=123`);

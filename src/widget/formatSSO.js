@@ -3,10 +3,9 @@ export const formatSSO = (url, ssoUserString) => {
 
   if (ssoUserString) {
     const ssoUserObj = JSON.parse(ssoUserString);
-    const tokenExists = ssoUserObj.ssoUserToken;
 
     userToken  =  (tokenExists)
-        ? decodeURIComponent(ssoUserObj.ssoUserToken)
+        ? decodeURIComponent(ssoUserObj.accessToken)
         : '';
   }
 
