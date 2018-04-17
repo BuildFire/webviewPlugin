@@ -1,11 +1,13 @@
 export const formatSSO = (url, ssoUserString) => {
+  let userToken = '';
+
   if (ssoUserString) {
     const ssoUserObj = JSON.parse(ssoUserString);
-    const tokenExists = ssoUserObj.accessToken;
-    return url.replace('{{SSO}}', tokenExists
-      ? decodeURIComponent(ssoUserObj.accessToken)
-      : '');
+
+    userToken  =  (tokenExists)
+        ? decodeURIComponent(ssoUserObj.accessToken)
+        : '';
   }
 
-  return url.replace('{{SSO}}', '');
+  return url.replace('{{SSO}}', userToken);
 };
