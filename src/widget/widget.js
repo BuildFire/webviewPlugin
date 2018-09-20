@@ -12,8 +12,8 @@ const flags = {};
 const setFlags = (content) => {
   flags.isWeb = (buildfire.context.device.platform == 'web');
   flags.shouldOpenInApp = (content.view == viewOptions.NATIVE);
-  flags.isNotCP = (flags.isLiveMode || !flags.isWeb);
   flags.isLiveMode = buildfire.context.liveMode;
+  flags.isNotCP = (flags.isLiveMode === 1 || !flags.isWeb);
   flags.requiresSSO = content.url && content.url.indexOf('{{SSO}}') > 0;
   flags.isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 };
