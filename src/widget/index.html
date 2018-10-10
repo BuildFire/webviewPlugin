@@ -21,22 +21,5 @@
         web page now click <a id="targetUrl" href="#" target="_blank">here</a></p>
   </div>
 
-  <script src="https://dmc1acwvwny3.cloudfront.net/atatus.js"></script>
-  <script type="application/javascript">
-      function initAtatus(retry) {
-        if (typeof(atatus) != "undefined") {
-          var loggedInUser = getLocalStorageJSON("AUTH_CURRENT_USER");
-          atatus.config('fa0f99a5d1bc4962bc0ad5aa9f911ce9', { tags: [
-            window.currentAppId,
-            loggedInUser.email,
-            'webViewPlugin'
-          ] }).install();
-        }
-        else if (retry)
-          setTimeout(initAtatus, 1000);
-      }
-      initAtatus(true);
-  </script>
-
 </body>
 </html>
