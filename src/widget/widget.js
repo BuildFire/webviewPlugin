@@ -22,12 +22,13 @@ const render = (content) => {
 
   const handleWindow = (openWindow, displayIniFrame, displaySuccessMessage) => {
     if(openWindow){
+      setTimeout(() => buildfire.navigation.goBack(), 750);
+
       if(content.view === viewOptions.POPUP)
         buildfire.navigation.openWindow(content.url, "_blank");
       else
         buildfire.navigation.openWindow(content.url, "_system");
 
-      setTimeout(() => buildfire.navigation.goBack(), 750);
       return;
     }
     if(displayIniFrame){
