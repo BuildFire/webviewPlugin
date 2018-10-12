@@ -22,13 +22,18 @@ const render = (content) => {
 
   const handleWindow = (openWindow, displayIniFrame, displaySuccessMessage) => {
     if(openWindow){
-      setTimeout(() => buildfire.navigation.goBack(), 750);
+      // setTimeout(() => buildfire.navigation.goBack(), 750);
 
-      if(content.view === viewOptions.POPUP)
-        buildfire.navigation.openWindow(content.url, "_blank");
+      if (content.view === viewOptions.POPUP)
+        buildfire.navigation.openWindow(content.url, "_blank", (response) => {
+          console.log('openWindow Callback - ', response);
+          buildfire.navigation.goBack();
+        });
       else
-        buildfire.navigation.openWindow(content.url, "_system");
-
+        buildfire.navigation.openWindow(content.url, "_system", (response) => {
+          console.log('openWindow Callback - ', response);
+          buildfire.navigation.goBack();
+        });
       return;
     }
     if(displayIniFrame){
