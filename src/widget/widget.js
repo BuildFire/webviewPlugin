@@ -42,8 +42,10 @@ const render = (content) => {
     }
   };
 
+  window.document.getElementById('successMessage').style.display = 'none';
+
   setFlags(content);
-  const displayIniFrame = flags.isNotCP && flags.shouldOpenInApp;  //on the device and open native
+  const displayIniFrame = flags.shouldOpenInApp;  //on the device and open native
   const openWindow = flags.isNotCP && !flags.shouldOpenInApp;      //on the device and open in pop up or native brow
   const displaySuccessMessage = content.url && flags.isWeb && !flags.isLiveMode;
 
