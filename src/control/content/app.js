@@ -59,6 +59,9 @@
 				return res && res.data && !angular.equals({}, res.data) && res.id;
 			}
 		});
+		buildfire.messaging.onReceivedMessage = function (message) {
+			buildfire.messaging.sendMessageToWidget(message);
+		};
 
 		$scope.saveData = function() {
 			if (!$scope.datastoreInitialized) {
@@ -75,7 +78,6 @@
 			dataChanged = false;
 
 			setDataValid();
-			showPopup(data.content);
 
 			if (!/^https?\:\/\//.test(data.content.url)) {
 				data.content.url = 'http://' + data.content.url;
@@ -92,21 +94,6 @@
 
 				$log.info('Widget details saved');
 			});
-
-			function showPopup(content) {
-				if (!content.view === $scope.viewType.NATIVE_IN_APP) return;
-
-				if (localStorage.getItem('webview_modal-shown')) return;
-
-				var options = {
-					title: 'In App Webview Warning',
-					message: 'This view may vary based on device resolution'
-				};
-
-				buildfire.notifications.showDialog(options, function() {
-					localStorage.setItem('webview_modal-shown', '1');
-				});
-			}
 
 			function setDataInvalid() {
 				$log.warn('invalid data, details will not be saved');
