@@ -39,7 +39,6 @@
 						view: $scope.viewType.NATIVE_IN_APP
 					}
         };
-        localStorage.removeItem('webview_modal-shown');
 			}
 
 			$scope.$watch('data', watchFn, true);
@@ -59,6 +58,7 @@
 				return res && res.data && !angular.equals({}, res.data) && res.id;
 			}
 		});
+
 		buildfire.messaging.onReceivedMessage = function (message) {
 			buildfire.messaging.sendMessageToWidget(message);
 		};
