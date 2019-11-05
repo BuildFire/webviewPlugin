@@ -42,8 +42,10 @@ const render = (content) => {
     }
   };
 
+  window.document.getElementById('successMessage').style.display = 'none';
+
   setFlags(content);
-  const displayIniFrame = flags.isNotCP && flags.shouldOpenInApp;  //on the device and open native
+  const displayIniFrame = flags.shouldOpenInApp;  //on the device and open native
   const openWindow = flags.isNotCP && !flags.shouldOpenInApp;      //on the device and open in pop up or native brow
   const displaySuccessMessage = content.url && flags.isWeb && !flags.isLiveMode;
 
@@ -65,6 +67,8 @@ const renderiFrame = (props) =>{
   if (currentIframe) {
     currentIframe.remove();
   }
+
+  removeLoadingText();
 
   let scrollable = window.document.getElementById('scrollable');
   if (!scrollable && props.isIOS) {
@@ -97,6 +101,22 @@ const renderiFrame = (props) =>{
   let container = props.isIOS ? scrollable : window.document.body;
 
   container.appendChild((() => {
+    
+    if (flags.isWeb) {
+      let modal = (document.querySelectorAll('div[id^="confirm"]') || [])[0];
+      if (modal) {
+        let confirm = (modal.querySelectorAll('.approve-confirmation') || [])[0];
+        if (confirm && confirm.click) confirm.click();
+      }
+
+      const targetProtocol = (/[a-z]{4,5}:/g.exec(props.url) || [])[0] || false;
+      let url = (/(http|https):\/\/\S+\.[a-z]+/g.exec(props.url) || [])[0] || 'this site';
+
+      if (window.location.protocol === 'https:' && targetProtocol === 'http:') {
+        buildfire.messaging.sendMessageToControl({ tag: 'mixedContent', url: url });
+      }
+    }
+
     let iFrame = window.document.createElement('iframe');
     iFrame.id = 'webviewIframe';
     iFrame.src = props.url;
@@ -105,8 +125,13 @@ const renderiFrame = (props) =>{
     iFrame.style.width = '1px';
     iFrame.style.minWidth = '100%';
     iFrame.onload = () => {
-      window.document.getElementById('loadingText').remove();
+      removeLoadingText();
+      buildfire.messaging.sendMessageToControl({ tag: 'displayWarning' });
     };
+    setTimeout(() => {
+      removeLoadingText();
+    }, 3000);
+
     return iFrame;
   })());
 };
@@ -137,3 +162,40 @@ buildfire.datastore.get((err, result) => {
     console.log('appearance.ready() failed. Is sdk up to date?');
   }
 });
+buildfire.messaging.onReceivedMessage = message => {
+  if (message.tag === 'mixedContent' && message.url) {
+    return mixedContentWarning(message.url);
+  }
+  if (message.tag === 'displayWarning') {
+    return showPopup();
+  }
+};
+
+function removeLoadingText() {
+  let loadingText = window.document.getElementById('loadingText');
+  if (loadingText) loadingText.remove();
+}
+
+function showPopup() {
+  if (localStorage.getItem('webview_modal-shown')) return;
+
+  var options = {
+    message: 'This view may vary based on device resolution',
+    target: document.getElementById('warning-message'),
+    buttonLabels: ['I understand']
+  };
+
+  buildfire.notifications.confirm(options, function() {
+    localStorage.setItem('webview_modal-shown', '1');
+  });
+}
+
+function mixedContentWarning(url) {
+  var options = {
+    message: `Can't render ${url}. Insecure resources (http) cannot be displayed in the control panel or PWAs, but may function on devices. Some operating systems also require https.`,
+    target: document.getElementById('warning-message'),
+    buttonLabels: ['I understand']
+  };
+
+  buildfire.notifications.confirm(options, () => { });
+}
