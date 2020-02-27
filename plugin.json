@@ -2,6 +2,7 @@
   "author":"BuildFire"
   ,"pluginName":"WebView"
   ,"pluginDescription":"The WebView plugin gives your users a native in-app experience, but allows you to link to external online content such as web pages, documents, food ordering, shopping carts, and pretty much anything else. Keywords: iframe, browser"
+  ,"pluginKeywords":"document,page,iframe"
   ,"supportEmail":"support@buildfire.com"
   ,"pluginIcon":"icon.png"
   ,"licenseKey": "a4sd6-as654asd6as545a65s4d6a-65asd564a"
