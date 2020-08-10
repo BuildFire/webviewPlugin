@@ -120,7 +120,7 @@ const renderiFrame = (props) =>{
     let iFrame = window.document.createElement('iframe');
     iFrame.id = 'webviewIframe';
     iFrame.src = props.url;
-    iFrame.scrolling = props.isIOS ? 'no' : 'auto';
+    iFrame.scrolling = props.isIOS ? 'yes' : 'auto';
     iFrame.style.height = '100%';
     iFrame.style.width = '1px';
     iFrame.style.minWidth = '100%';
