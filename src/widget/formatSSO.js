@@ -9,3 +9,11 @@ export const formatSSO = (url, ssoUserString) => {
 
     return url.replace('{{SSO}}', '');
 };
+
+export const formatOAuth = (url, accessToken) => {
+	if (accessToken) {
+		return url.replace('{{SSO}}',  encodeURIComponent(accessToken));
+	}
+
+	return url.replace('{{SSO}}', '');
+};

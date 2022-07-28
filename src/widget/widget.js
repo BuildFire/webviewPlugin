@@ -1,5 +1,5 @@
 const buildfire = require('buildfire');
-const { formatSSO } = require('./formatSSO');
+const { formatSSO, formatOAuth } = require('./formatSSO');
 
 const viewOptions = {
   POPUP: 'In app popup',
@@ -55,6 +55,15 @@ const render = (content) => {
         content.url = formatSSO(content.url, JSON.stringify(result.SSO));
         handleWindow(openWindow, displayIniFrame, displaySuccessMessage);
       }
+	  else{
+		  if (result && result.oauthProfile && result.oauthProfile.accessToken) {
+			  content.url = formatOAuth(content.url, result.oauthProfile.accessToken);
+			  handleWindow(openWindow, displayIniFrame, displaySuccessMessage);
+		  }
+		  else{
+			  handleWindow(openWindow, displayIniFrame, displaySuccessMessage);
+		  }
+	  }
     });
   } else {   //this is all other URLs, i.e. no SSO.
     handleWindow(openWindow, displayIniFrame, displaySuccessMessage);
@@ -101,7 +110,7 @@ const renderiFrame = (props) =>{
   let container = props.isIOS ? scrollable : window.document.body;
 
   container.appendChild((() => {
-    
+
     if (flags.isWeb) {
       let modal = (document.querySelectorAll('div[id^="confirm"]') || [])[0];
       if (modal) {
