@@ -24,8 +24,14 @@ const render = (content) => {
     if(openWindow){
       setTimeout(() => buildfire.navigation.goBack(), 750);
 
-      if(content.view === viewOptions.POPUP)
-        buildfire.navigation.openWindow(content.url, "_blank");
+      if(content.view === viewOptions.POPUP){
+        if(flags.isWeb){
+          renderiFrame({url: content.url, isIOS: flags.isIOS});
+          return;
+        } else {
+          buildfire.navigation.openWindow(content.url, "_blank");
+        }
+      }
       else
         buildfire.navigation.openWindow(content.url, "_system");
 
@@ -36,9 +42,15 @@ const render = (content) => {
       return;
     }
     if(displaySuccessMessage){
-      window.document.getElementById('successMessage').style.display = 'block';
-      window.document.getElementById('targetUrl').href = content.url;
-      return;
+      if(flags.isWeb){
+        renderiFrame({url: content.url, isIOS: flags.isIOS});
+        return;
+      } else {
+        window.document.getElementById('successMessage').style.display = 'block';
+        window.document.getElementById('targetUrl').href = content.url;
+        return;
+      }
+      
     }
   };
 
