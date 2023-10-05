@@ -1,7 +1,7 @@
 {
   "author":"BuildFire"
   ,"pluginName":"WebView"
-  ,"pluginDescription":"The WebView plugin gives your users a native in-app experience, but allows you to link to external online content such as web pages, documents, food ordering, shopping carts, and pretty much anything else. Keywords: iframe, browser"
+  ,"pluginDescription":"Seamlessly embed web content into your mobile app."
   ,"pluginKeywords":"document,page,iframe,instagram,website"
   ,"supportEmail":"support@buildfire.com"
   ,"supportSite":"https://learn.appdocumentation.com/en/articles/1691379-webview-tutorial"
@@ -25,6 +25,31 @@
    ],
    "languages":[
       "en"
-   ],
+   ],"media": [
+    {
+      "type": "image-resource",
+      "path": "1-Plugin.png"
+    },
+    {
+      "type": "image-resource",
+      "path": "2-Benefits.png"
+    },
+    {
+      "type": "image-resource",
+      "path": "3-Use-Cases.png"
+    },
+    {
+      "type": "image-resource",
+      "path": "4-Content-Tab.png"
+    },
+    {
+      "type": "image-resource",
+      "path": "5-Analytics-Tab.png"
+    },
+    {
+      "type": "youtube-video",
+      "path": "https://www.youtube.com/watch?v=XbBS8vpwuHw"
+    }
+  ],
   "webpack": 8080
 }
