@@ -36,7 +36,7 @@
 				$scope.data = {
 					content: {
 						url: '',
-						view: $scope.viewType.NATIVE_IN_APP
+						view: $scope.viewType.IN_APP_POPUP
 					}
         };
 			}

@@ -6,6 +6,7 @@
   <!-- CSS -->
   <link href="../../../../styles/helper.css" rel="stylesheet">
   <link href="../../../../styles/siteIcons.css" rel="stylesheet">
+  <link href="../../../../styles/control/bf-base.css" rel="stylesheet">
 
   <!-- JS -->
   <script src="../../../../scripts/buildfire.js"></script>
@@ -15,6 +16,13 @@
     .radio-block {
       display: block !important;
       padding-bottom: 5px;
+    }
+    p.info-note {
+      margin-top: 15px;
+    }
+    p.info-note.text-warning {
+      color: var(--c-warning);
+      background-color: var(--c-gray1);
     }
   </style>
 </head>
@@ -55,7 +63,7 @@
 
   <div class="item clearfix row">
     <div class="main pull-right col-md-9">
-      <div class="alert alert-success alert-sm text-center" ng-if="urlValid">Url
+      <div class="alert alert-success alert-sm text-center" ng-if="urlValid">URL
         successfully validated
       </div>
       <div class="alert alert-danger alert-sm text-center" ng-if="urlInValid">
@@ -67,17 +75,20 @@
   <div class="item clearfix row">
     <div class="col-md-9 pull-right">
       <div class="radio radio-primary radio-block">
-        <input id="inapp" type="radio" ng-model="data.content.view"
-               ng-value="viewType.NATIVE_IN_APP"
-               name="viewType" ng-change="changeViewType()">
-        <label for="inapp">Native in app</label>
-      </div>
-      <div class="radio radio-primary radio-block">
         <input id="popup" type="radio" ng-model="data.content.view"
                ng-value="viewType.IN_APP_POPUP"
                name="viewType" ng-change="changeViewType()">
-        <label for="popup">In app popup window</label>
+        <label for="popup">In Popup Window</label>
       </div>
+      <div class="radio radio-primary radio-block">
+        <input id="inapp" type="radio" ng-model="data.content.view"
+               ng-value="viewType.NATIVE_IN_APP"
+               name="viewType" ng-change="changeViewType()">
+        <label for="inapp">In Feature</label>
+      </div>
+      <p ng-if="data.content.view === viewType.NATIVE_IN_APP" class="info-note text-warning" style="width: 100%;">
+		  Some websites <strong>may not function properly</strong> in the in-feature WebView due to <strong>Apple's restrictions on cross-origin iframes</strong>, which can affect login and state management, or due to internal policies of certain sites like Google and Amazon that prevent them from being displayed in the app’s native component. If your web page does not appear or work as expected, we recommend using one of the alternative methods available.
+      </p>
       <div class="radio radio-primary radio-block">
         <input id="external" type="radio" ng-model="data.content.view"
                ng-value="viewType.EXTERNAL_BROWSER"
@@ -90,17 +101,11 @@
         mobile optimized content. <br>(Disclaimer: Some websites will show
         mobile version of site only on mobile devices.)</p>
 
-      <p class="info padding-zero">Note 2: Certain websites like Google,
-        Amazon, and others have limitations and/or internal policies that
-        prohibit it from being shown in the app's native component.
-        Therefore, if your web page does not show up in this selection, please
-        try using one of the other two methods.</p>
-
-      <p class="info padding-zero">Note 3: If you are taking payments through
+      <p class="info padding-zero">Note 2: If you are taking payments through
         this web page, you must open the the URL outside of the app or the app
         will get rejected by Apple in the submission review process.</p>
 
-      <p class="info padding-zero">Note 4: It is best to use secure websites (<strong>Https</strong>) some operating systems require it.</p>
+      <p class="info padding-zero">Note 3: It is best to use secure websites (<strong>Https</strong>) some operating systems require it.</p>
 
       <p class="info padding-zero">Hint: If you are taking payments, use your
         app or content DeepLink URL to redirect back to the app after a payment
