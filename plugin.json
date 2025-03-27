@@ -45,10 +45,6 @@
     {
       "type": "image-resource",
       "path": "5-Analytics-Tab.png"
-    },
-    {
-      "type": "youtube-video",
-      "path": "https://www.youtube.com/watch?v=XbBS8vpwuHw"
     }
   ],
   "webpack": 8080
