@@ -17,22 +17,19 @@
       display: block !important;
       padding-bottom: 5px;
     }
-    p.info-note {
-      margin-top: 15px;
-    }
-    p.info-note.text-warning {
-      color: var(--c-warning);
-      background-color: var(--c-gray1);
-    }
-    .notes {
+    .note {
       padding: 12px 20px;
       margin-top: 15px;
       margin-bottom: 15px;
       background: #F5F5F5;
     }
-    .notes .bold {
-      font-weight: bold;
-      margin-top: 20px
+    .note .bold {
+      font-weight: 500;
+    }
+    .image-container img {
+      margin: 10px;
+      border-radius: 8px;
+      box-shadow: 0 0 8px 2px rgba(0,0,0,0.10);
     }
   </style>
 </head>
@@ -83,7 +80,7 @@
   </div>
   <hr class="none">
   <div class="item clearfix row">
-    <div class="col-md-3 pull-left">
+    <div class="image-container col-md-3 pull-left">
       <img 
         ng-if="data.content.view === viewType.NATIVE_IN_APP"
         ng-src="../../resources/native-webview.jpg"
@@ -110,24 +107,24 @@
                name="viewType" ng-change="changeViewType()">
         <label for="inapp">In Feature</label>
       </div>
-      <div ng-if="data.content.view === viewType.NATIVE_IN_APP" class="margin-left-twenty" style="display: flex; gap: 20px; align-items: center;">
+      <div ng-if="data.content.view === viewType.NATIVE_IN_APP" class="flex margin-left-twenty">
         <div class="radio radio-primary radio-block">
           <input id="insideIframe" type="radio" ng-model="data.content.viewSupType"
                  ng-value="viewSupType.IFRAME"
                  name="viewSupType" ng-change="changeViewType()">
           <label for="insideIframe">iFrame</label>
         </div>
-        <div class="radio radio-primary radio-block margin-top-ten">
+        <div class="radio radio-primary radio-block margin-top-ten margin-left-twenty">
           <input id="nativeWebview" type="radio" ng-model="data.content.viewSupType"
                  ng-value="viewSupType.NATIVE_WEBVIEW"
                  name="viewSupType" ng-change="changeViewType()">
           <label for="nativeWebview">Native Webview (Beta)</label>
         </div>
       </div>
-      <div class="notes" ng-if="data.content.view === viewType.NATIVE_IN_APP && data.content.viewSupType === viewSupType.IFRAME">
-        <strong>Some websites may not work correctly when opened inside the app, especially in the built-in browser view.</strong> This is often due to Apple’s security rules or website settings from companies like Google and Amazon that block their pages from being shown in this way. If your webpage doesn’t load or work as expected, we recommend trying one of the other viewing options available.
+      <div class="note" ng-if="data.content.view === viewType.NATIVE_IN_APP && data.content.viewSupType === viewSupType.IFRAME">
+        <span class="bold">Some websites may not work correctly when opened inside the app, especially in the built-in browser view.</span> This is often due to Apple’s security rules or website settings from companies like Google and Amazon that block their pages from being shown in this way. If your webpage doesn’t load or work as expected, we recommend trying one of the other viewing options available.
       </div>
-      <div class="notes" ng-if="data.content.view === viewType.NATIVE_IN_APP && data.content.viewSupType === viewSupType.NATIVE_WEBVIEW">
+      <div class="note" ng-if="data.content.view === viewType.NATIVE_IN_APP && data.content.viewSupType === viewSupType.NATIVE_WEBVIEW">
         Native Webview is a new feature that works around iFrame issues. If the iFrame option isn’t working, try using Native Webview instead.
       </div>
       <div class="radio radio-primary radio-block">
@@ -136,9 +133,9 @@
                name="viewType" ng-change="changeViewType()">
         <label for="external">Device's default external browser</label>
       </div>
-      <div class="notes">
+      <div class="note">
         <div>For the best experience, link to mobile-optimized and secure (HTTPS) content. If your webpage includes payment processing, it must open outside of the app—otherwise, Apple may reject your app during review. Also, be aware that some websites only display their mobile layout on actual mobile devices.</div>
-        <div class="bold">Note: If you’re accepting payments, use a Deep Link to redirect users back into your app after the transaction is complete.</div>
+        <div class="bold margin-top-twenty">Note: If you’re accepting payments, use a Deep Link to redirect users back into your app after the transaction is complete.</div>
       </div>
       
     </div>
