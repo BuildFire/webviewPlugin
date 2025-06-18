@@ -14,6 +14,11 @@
 			EXTERNAL_BROWSER: 'External browser'
 		};
 
+		$scope.viewSupType = {
+			IFRAME: 'iFrame',
+			NATIVE_WEBVIEW: 'Native webview'
+		};
+
 		buildfire.datastore.get(function(err, result) {
 			if (err) return console.error('Error: ', err);
 
@@ -32,11 +37,17 @@
 						$scope.data.content.view = $scope.viewType.IN_APP_POPUP;
 					}
 				}
+
+				// Backward compatibility: If viewType.NATIVE_IN_APP was selected before, default to viewSupType.IFRAME
+				if ($scope.data.content.view === $scope.viewType.NATIVE_IN_APP && !$scope.data.content.viewSupType) {
+					$scope.data.content.viewSupType = $scope.viewSupType.IFRAME;
+				}
 			} else {
 				$scope.data = {
 					content: {
 						url: '',
-						view: $scope.viewType.IN_APP_POPUP
+						view: $scope.viewType.IN_APP_POPUP,
+						viewSupType: null // Initialize viewSupType
 					}
         };
 			}
@@ -118,22 +129,22 @@
 		};
 
 		$scope.changeViewType = function() {
-      dataChanged = true;
-      
-      if ($scope.frmMain.$invalid) return;
+			dataChanged = true;
+			
+			if ($scope.frmMain.$invalid) return;
 
-      var data = $scope.data;
+			var data = $scope.data;
 
-      if (data.content.openInApp != undefined) {
-        data.content.openInApp = null;
-      }
-      buildfire.datastore.save(data, function(err, result) {
-        if (err || !result) {
-          $log.error('Error saving the widget details: ', err);
-        } else {
-          $log.info('Widget details saved');
-        }
-      });
+			if (data.content.openInApp != undefined) {
+				data.content.openInApp = null;
+			}
+			buildfire.datastore.save(data, function(err, result) {
+				if (err || !result) {
+				$log.error('Error saving the widget details: ', err);
+				} else {
+				$log.info('Widget details saved');
+				}
+			});
 		};
 
 		$scope.openMethodChanged = function() {

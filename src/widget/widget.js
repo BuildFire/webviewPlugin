@@ -4,7 +4,8 @@ const { formatSSO, formatOAuth } = require('./formatSSO');
 const viewOptions = {
   POPUP: 'In app popup',
   NATIVE: 'Native In App',
-  EXTERNAL: 'External browser'
+  EXTERNAL: 'External browser',
+  NATIVE_WEBVIEW: 'Native webview',
 };
 
 const flags = {};
@@ -12,6 +13,7 @@ const flags = {};
 const setFlags = (content) => {
   flags.isWeb = (buildfire.context.device.platform == 'web');
   flags.shouldOpenInApp = (content.view == viewOptions.NATIVE);
+  flags.shouldOpenPluginInboundWebview = (content.view == viewOptions.NATIVE && content.viewSupType == viewOptions.NATIVE_WEBVIEW);
   flags.isLiveMode = buildfire.context.liveMode;
   flags.isNotCP = (flags.isLiveMode === 1 || !flags.isWeb);
   flags.requiresSSO = content.url && content.url.indexOf('{{SSO}}') > 0;
@@ -20,7 +22,7 @@ const setFlags = (content) => {
 
 const render = (content) => {
 
-  const handleWindow = (openWindow, displayIniFrame, displaySuccessMessage) => {
+  const handleWindow = ({openWindow, displayIniFrame, shouldOpenPluginInboundWebview,  displaySuccessMessage}) => {
     if(openWindow){
       setTimeout(() => buildfire.navigation.goBack(), 750);
 
@@ -34,21 +36,25 @@ const render = (content) => {
       }
       else
         buildfire.navigation.openWindow(content.url, "_system");
-
-      return;
-    }
-    if(displayIniFrame){
-      renderiFrame({url: content.url, isIOS: flags.isIOS});
-      return;
-    }
-    if(displaySuccessMessage){
+    } else if (shouldOpenPluginInboundWebview) {
       if(flags.isWeb){
         renderiFrame({url: content.url, isIOS: flags.isIOS});
         return;
       } else {
+        // Show the title bar and open the window
+        buildfire.appearance.titlebar.show(null, (err) => {
+          if (err) return console.error(err);
+            buildfire.navigation.openWindowWithOptions({url: content.url, target: "_plugin", windowFeatures: "pushToHistory=true"});
+        });
+      }
+    } else if(displayIniFrame){
+      renderiFrame({url: content.url, isIOS: flags.isIOS});
+    } else if(displaySuccessMessage){
+      if(flags.isWeb){
+        renderiFrame({url: content.url, isIOS: flags.isIOS});
+      } else {
         window.document.getElementById('successMessage').style.display = 'block';
         window.document.getElementById('targetUrl').href = content.url;
-        return;
       }
       
     }
@@ -59,26 +65,27 @@ const render = (content) => {
   setFlags(content);
   const displayIniFrame = flags.shouldOpenInApp;  //on the device and open native
   const openWindow = flags.isNotCP && !flags.shouldOpenInApp;      //on the device and open in pop up or native brow
+  const shouldOpenPluginInboundWebview = flags.isNotCP && flags.shouldOpenPluginInboundWebview; //on the device and open in webview
   const displaySuccessMessage = content.url && flags.isWeb && !flags.isLiveMode;
 
   if (flags.requiresSSO) {   //This is an SSO webview with an access token
     buildfire.auth.getCurrentUser((err, result) => {
       if (result && result.SSO && result.SSO.accessToken) {
         content.url = formatSSO(content.url, JSON.stringify(result.SSO));
-        handleWindow(openWindow, displayIniFrame, displaySuccessMessage);
+        handleWindow({openWindow, displayIniFrame, shouldOpenPluginInboundWebview, displaySuccessMessage});
       }
 	  else{
 		  if (result && result.oauthProfile && result.oauthProfile.accessToken) {
 			  content.url = formatOAuth(content.url, result.oauthProfile.accessToken);
-			  handleWindow(openWindow, displayIniFrame, displaySuccessMessage);
+			  handleWindow({openWindow, displayIniFrame, shouldOpenPluginInboundWebview, displaySuccessMessage});
 		  }
 		  else{
-			  handleWindow(openWindow, displayIniFrame, displaySuccessMessage);
+			  handleWindow({openWindow, displayIniFrame, shouldOpenPluginInboundWebview, displaySuccessMessage});
 		  }
 	  }
     });
   } else {   //this is all other URLs, i.e. no SSO.
-    handleWindow(openWindow, displayIniFrame, displaySuccessMessage);
+    handleWindow({openWindow, displayIniFrame, shouldOpenPluginInboundWebview, displaySuccessMessage});
   }
 
 };
