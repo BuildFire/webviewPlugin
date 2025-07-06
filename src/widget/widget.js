@@ -44,7 +44,14 @@ const render = (content) => {
         // Show the title bar and open the window
         buildfire.appearance.titlebar.show(null, (err) => {
           if (err) return console.error(err);
-            buildfire.navigation.openWindowWithOptions({url: content.url, target: "_plugin", windowFeatures: "pushToHistory=true"});
+          buildfire.navigation.openWindowWithOptions({url: content.url, target: "_plugin", windowFeatures: "pushToHistory=true"});
+          buildfire.messaging.onReceivedBroadcast = (event) => {
+            if (event.message === 'webview hidden') {
+              document.getElementById('webviewReload').style.display = 'none';
+            } else if (event.message === 'webview closed') {
+              document.getElementById('webviewReload').style.display = 'flex';
+            }
+          };
         });
       }
     } else if(displayIniFrame){
