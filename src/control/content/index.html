@@ -93,7 +93,7 @@
         ng-if="data.content.view === viewType.EXTERNAL_BROWSER"
         ng-src="../../resources/external-browser.jpg"
         alt="External Browser Preview">
-  </div>
+    </div>
     <div class="col-md-9 pull-right">
       <div class="radio radio-primary radio-block">
         <input id="popup" type="radio" ng-model="data.content.view"
@@ -109,23 +109,24 @@
       </div>
       <div ng-if="data.content.view === viewType.NATIVE_IN_APP" class="flex margin-left-twenty">
         <div class="radio radio-primary radio-block">
-          <input id="insideIframe" type="radio" ng-model="data.content.viewSupType"
-                 ng-value="viewSupType.IFRAME"
-                 name="viewSupType" ng-change="changeViewType()">
+          <input id="insideIframe" type="radio" ng-model="data.content.viewSubtype"
+                 ng-value="viewSubtype.IFRAME"
+                 name="viewSubtype" ng-change="changeViewType()">
           <label for="insideIframe">iFrame</label>
         </div>
         <div class="radio radio-primary radio-block margin-top-ten margin-left-twenty">
-          <input id="nativeWebview" type="radio" ng-model="data.content.viewSupType"
-                 ng-value="viewSupType.NATIVE_WEBVIEW"
-                 name="viewSupType" ng-change="changeViewType()">
+          <input id="nativeWebview" type="radio" ng-model="data.content.viewSubtype"
+                 ng-value="viewSubtype.NATIVE_WEBVIEW"
+                 name="viewSubtype" ng-change="changeViewType()">
           <label for="nativeWebview">Native Webview (Beta)</label>
         </div>
       </div>
-      <div class="note" ng-if="data.content.view === viewType.NATIVE_IN_APP && data.content.viewSupType === viewSupType.IFRAME">
+      <div class="note" ng-if="data.content.view === viewType.NATIVE_IN_APP && data.content.viewSubtype === viewSubtype.IFRAME">
         <span class="bold">Some websites may not work correctly when opened inside the app, especially in the built-in browser view.</span> This is often due to Apple’s security rules or website settings from companies like Google and Amazon that block their pages from being shown in this way. If your webpage doesn’t load or work as expected, we recommend trying one of the other viewing options available.
       </div>
-      <div class="note" ng-if="data.content.view === viewType.NATIVE_IN_APP && data.content.viewSupType === viewSupType.NATIVE_WEBVIEW">
+      <div class="note" ng-if="data.content.view === viewType.NATIVE_IN_APP && data.content.viewSubtype === viewSubtype.NATIVE_WEBVIEW">
         Native Webview is a new feature that works around iFrame issues. If the iFrame option isn’t working, try using Native Webview instead.
+        <div class="bold margin-top-twenty">Note: This feature will only work for apps with builds submitted to Apple App Store and Google Play Store after the 28, July 2025. For older builds the app will default to "In Popup Window" option.</div>
       </div>
       <div class="radio radio-primary radio-block">
         <input id="external" type="radio" ng-model="data.content.view"

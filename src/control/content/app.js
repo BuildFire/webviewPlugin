@@ -14,7 +14,7 @@
 			EXTERNAL_BROWSER: 'External browser'
 		};
 
-		$scope.viewSupType = {
+		$scope.viewSubtype = {
 			IFRAME: 'iFrame',
 			NATIVE_WEBVIEW: 'Native webview'
 		};
@@ -38,16 +38,16 @@
 					}
 				}
 
-				// Backward compatibility: If viewType.NATIVE_IN_APP was selected before, default to viewSupType.IFRAME
-				if ($scope.data.content.view === $scope.viewType.NATIVE_IN_APP && !$scope.data.content.viewSupType) {
-					$scope.data.content.viewSupType = $scope.viewSupType.IFRAME;
+				// Backward compatibility: If viewType.NATIVE_IN_APP was selected before, default to viewSubtype.IFRAME
+				if ($scope.data.content.view === $scope.viewType.NATIVE_IN_APP && !$scope.data.content.viewSubtype) {
+					$scope.data.content.viewSubtype = $scope.viewSubtype.IFRAME;
 				}
 			} else {
 				$scope.data = {
 					content: {
 						url: '',
 						view: $scope.viewType.IN_APP_POPUP,
-						viewSupType: null // Initialize viewSupType
+						viewSubtype: null // Initialize viewSubtype
 					}
         };
 			}
@@ -132,6 +132,10 @@
 			dataChanged = true;
 			
 			if ($scope.frmMain.$invalid) return;
+
+			if ($scope.data.content.view === $scope.viewType.NATIVE_IN_APP && !$scope.data.content.viewSubtype) {
+				$scope.data.content.viewSubtype = $scope.viewSubtype.IFRAME;
+			}
 
 			var data = $scope.data;
 

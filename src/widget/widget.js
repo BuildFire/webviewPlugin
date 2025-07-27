@@ -13,7 +13,7 @@ const flags = {};
 const setFlags = (content) => {
   flags.isWeb = (buildfire.context.device.platform == 'web');
   flags.shouldOpenInApp = (content.view == viewOptions.NATIVE);
-  flags.shouldOpenPluginInboundWebview = (content.view == viewOptions.NATIVE && content.viewSupType == viewOptions.NATIVE_WEBVIEW);
+  flags.shouldOpenPluginInboundWebview = (content.view == viewOptions.NATIVE && content.viewSubtype == viewOptions.NATIVE_WEBVIEW);
   flags.isLiveMode = buildfire.context.liveMode;
   flags.isNotCP = (flags.isLiveMode === 1 || !flags.isWeb);
   flags.requiresSSO = content.url && content.url.indexOf('{{SSO}}') > 0;
@@ -29,7 +29,6 @@ const render = (content) => {
       if(content.view === viewOptions.POPUP){
         if(flags.isWeb){
           renderiFrame({url: content.url, isIOS: flags.isIOS});
-          return;
         } else {
           buildfire.navigation.openWindow(content.url, "_blank");
         }
@@ -39,12 +38,11 @@ const render = (content) => {
     } else if (shouldOpenPluginInboundWebview) {
       if(flags.isWeb){
         renderiFrame({url: content.url, isIOS: flags.isIOS});
-        return;
       } else {
         // Show the title bar and open the window
         buildfire.appearance.titlebar.show(null, (err) => {
           if (err) return console.error(err);
-          buildfire.navigation.openWindowWithOptions({url: content.url, target: "_plugin", windowFeatures: "pushToHistory=true"});
+          buildfire.navigation.openWindow({url: content.url, target: "_plugin", windowFeatures: "pushToHistory=true"});
           buildfire.messaging.onReceivedBroadcast = (event) => {
             if (event.message === 'webview hidden') {
               document.getElementById('webviewReload').style.display = 'none';
@@ -63,7 +61,6 @@ const render = (content) => {
         window.document.getElementById('successMessage').style.display = 'block';
         window.document.getElementById('targetUrl').href = content.url;
       }
-      
     }
   };
 
