@@ -29,6 +29,13 @@
     .modal-header, .cancel-confirmation {
       display: none;
     }
+    #webviewReload {
+      display: none;
+      width: 100%;
+      height: 100%;
+      align-items: center;
+      justify-content: center;
+    }
   </style>
 </head>
 <body class="no-scroll">
@@ -41,6 +48,10 @@
 
   <div id="warning-message_wrapper">
     <div id="warning-message"></div>
+  </div>
+
+  <div id="webviewReload">
+    <h4>Click <a onclick="location.reload();" class="text-primary">here</a> to reload</h4>
   </div>
 </body>
 </html>
