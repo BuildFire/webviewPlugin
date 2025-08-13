@@ -151,6 +151,7 @@ const renderiFrame = (props) =>{
 
     let iFrame = window.document.createElement('iframe');
     iFrame.id = 'webviewIframe';
+    iFrame.allow = "autoplay; camera; microphone; geolocation; fullscreen; picture-in-picture";
     iFrame.src = props.url;
     iFrame.scrolling = props.isIOS ? 'yes' : 'auto';
     iFrame.style.height = '100%';
