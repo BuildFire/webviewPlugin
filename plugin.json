@@ -1,7 +1,7 @@
 {
   "author":"Buildfire"
-  ,"pluginName":"WebView"
-  ,"pluginDescription":"Seamlessly embed web content into your mobile app with the WebView plugin, enabling smooth integration of external websites, pages, and interactive elements."
+  ,"pluginName":"Web Content"
+  ,"pluginDescription":"Seamlessly embed web content into your mobile app with the Web Content plugin, enabling smooth integration of external websites, pages, and interactive elements."
   ,"pluginKeywords":"document,page,iframe,instagram,website"
   ,"supportEmail":"support@buildfire.com"
   ,"supportSite":"https://learn.appdocumentation.com/en/articles/1691379-webview-tutorial"
@@ -15,7 +15,7 @@
       "enabled":false
     }
     , "settings":{
-      "enabled":false
+      "enabled": true 
     }
   }
   ,"widget":{

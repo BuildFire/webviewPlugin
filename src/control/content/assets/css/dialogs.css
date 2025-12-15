@@ -1,0 +1,160 @@
+.dialog-backdrop {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: rgba(16, 16, 16, 0.20);
+	z-index: 34;
+}
+
+.dialog-container {
+	left: 50%;
+	position: fixed;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	width: 100%;
+	z-index: 35;
+    max-width: 600px;
+    opacity: 0;
+}
+
+.dialog {
+	background: #fff;
+	border-radius: 15px;
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+    box-shadow: 0 0 18.574px 0 rgba(0, 0, 0, 0.05);
+}
+
+.dialog-header {
+	align-items: center;
+	border-bottom: 1px solid rgba(16,16,16,0.15);
+	display: flex;
+	justify-content: space-between;
+	padding: 14px 20px;
+}
+
+.dialog-title {
+    color: #101010;
+    font-size: 15px;
+    font-style: normal;
+    font-weight: 500;
+    letter-spacing: -0.15px;
+    line-height: normal;
+}
+
+.dialog-body {
+	padding: 20px;
+}
+
+.dialog-body p {
+    color: #101010;
+    font-size: 15px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 150%;
+    letter-spacing: -0.15px;
+}
+
+.dialog-body .italic {
+    font-style: italic;
+}
+
+.dialog-footer {
+	display: flex;
+	justify-content: flex-end;
+	align-items: center;
+	padding: 16px;
+	border-top: 1px solid rgba(16, 16, 16, 0.15);
+}
+
+.dialog-action {
+    background: #101010;
+    border-radius: 8px;
+    color: #FFFFFF;
+    font-size: 15px;
+    font-style: normal;
+    font-weight: 500;
+    letter-spacing: -0.3px;
+    line-height: 100%;
+    padding: 11px 40px;
+}
+
+.dialog-action:disabled {
+    cursor: default;
+    opacity: 0.2;
+    pointer-events: none;
+    user-select: none;
+}
+
+.checkbox label {
+    color: #000;
+    font-size: 15px !important;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
+
+.ai-dialog .dialog-header {
+    border-bottom: none;
+}
+
+.ai-prompt {
+    border-radius: 5px;
+    border: 1px solid rgba(16, 16, 16, 0.15);
+    display: block;
+    margin-bottom: 20px;
+    padding: 17px;
+    resize: none;
+    width: 100%;
+}
+
+.ai-prompt::placeholder {
+    color: rgba(16, 16, 16, 0.30);
+    font-size: 15px;
+    font-style: normal;
+    font-weight: 500;
+    letter-spacing: -0.3px;
+    line-height: 100%;
+}
+
+.ai-dialog .ai-examples li {
+    background: #F5F5F5;
+    border-radius: 100px;
+    color: #101010;
+    font-size: 15px;
+    font-style: normal;
+    font-weight: 400;
+    letter-spacing: -0.3px;
+    line-height: 130%;
+    margin-bottom: 13px;
+    padding: 12px 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+}
+
+.ai-dialog .ai-examples li:hover {
+    background: #E0E0E0;
+}
+
+.ai-dialog .ai-examples-title {
+    color: #101010;
+    font-size: 15px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 100%;
+    letter-spacing: -0.3px;
+    margin: 20px 0;
+}
+
+.ai-dialog .create-assistant-container {
+    align-items: center;
+    display: flex;
+    justify-content: flex-end;
+}

@@ -21,6 +21,25 @@ const setFlags = (content) => {
 };
 
 const render = (content) => {
+  // Prevent infinite loop: only fetch context if not already fetched
+  if (content.isCustomContent && !content._contextFetched) {
+    buildfire.getContext(function(err, context) {
+      if (err) {
+        console.error('Error getting context:', err);
+        return;
+      }
+      var cmsHost = context.endPoints.cmsHost;
+      var url = cmsHost + '/cms/sdk/widget/' + context.appId + '/' + context.pluginId + '/' + context.instanceId + '/primary/' + context.liveMode;
+      content.url = url;
+      content._contextFetched = true; // Mark as fetched
+      render(content); // Re-render with updated URL
+    });
+    return; // Stop further execution until context is fetched
+  }
+  // Remove the flag after using it, so future renders are clean
+  if (content._contextFetched) {
+    delete content._contextFetched;
+  }
 
   const handleWindow = ({openWindow, displayIniFrame, shouldOpenPluginInboundWebview,  displaySuccessMessage}) => {
     if(openWindow){
@@ -45,9 +64,9 @@ const render = (content) => {
           buildfire.navigation.openWindow({url: content.url, target: "_plugin", windowFeatures: "pushToHistory=true"});
           buildfire.messaging.onReceivedBroadcast = (event) => {
             if (event.message === 'webview hidden') {
-              document.getElementById('webviewReload').style.display = 'none';
+              document.getElementById('webContentReload').style.display = 'none';
             } else if (event.message === 'webview closed') {
-              document.getElementById('webviewReload').style.display = 'flex';
+              document.getElementById('webContentReload').style.display = 'flex';
             }
           };
         });
@@ -95,7 +114,7 @@ const render = (content) => {
 };
 
 const renderiFrame = (props) =>{
-  let currentIframe = window.document.getElementById('webviewIframe');
+  let currentIframe = window.document.getElementById('webContentIframe');
   if (currentIframe) {
     currentIframe.remove();
   }
@@ -150,7 +169,7 @@ const renderiFrame = (props) =>{
     }
 
     let iFrame = window.document.createElement('iframe');
-    iFrame.id = 'webviewIframe';
+    iFrame.id = 'webContentIframe';
     iFrame.allow = "autoplay; camera; microphone; geolocation; fullscreen; picture-in-picture";
     iFrame.src = props.url;
     iFrame.scrolling = props.isIOS ? 'yes' : 'auto';
@@ -170,7 +189,12 @@ const renderiFrame = (props) =>{
 };
 
 buildfire.spinner.show();
-buildfire.datastore.onUpdate(event => render(event.data.content));
+buildfire.datastore.onUpdate(event => {
+  // prevent re-rendering if it's custom content, where we send reload event when needed
+  if (event.data.content.isCustomContent != true) {
+    render(event.data.content);
+  }
+});
 buildfire.datastore.get((err, result) => {
   if (err) {
     console.error("error: ", err);
@@ -196,11 +220,15 @@ buildfire.datastore.get((err, result) => {
   }
 });
 buildfire.messaging.onReceivedMessage = message => {
-  if (message.tag === 'mixedContent' && message.url) {
-    return mixedContentWarning(message.url);
-  }
-  if (message.tag === 'displayWarning') {
-    return showPopup();
+  if (message.tag === 'reloadWebContent') {
+    buildfire.datastore.get((err, result) => {
+      if (err || !result.data || !result.data.content) return;
+      render(result.data.content);
+    });
+  } else if (message.tag === 'mixedContent' && message.url) {
+    mixedContentWarning(message.url);
+  } else if (message.tag === 'displayWarning') {
+    showPopup();
   }
 };
 

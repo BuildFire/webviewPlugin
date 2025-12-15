@@ -1,10 +1,14 @@
 (function(angular, buildfire) {
-	var webviewPluginApp = angular.module('webviewPlugin', []);
+	var webContentPluginApp = angular.module('webContentPlugin', []);
 
-	webviewPluginApp.controller('webviewPluginCtrl', ['$scope', '$log', '$timeout', controller]);
+	webContentPluginApp.controller('webContentPluginCtrl', ['$scope', '$log', '$timeout', controller]);
 
 	function controller($scope, $log, $timeout) {
 		var dataChanged = false;
+		var modeChanged = false;
+		var disclaimerAcknowledged = null;
+		var savedHtml = '';
+		var conversationId = null;
 		$scope.datastoreInitialized = false;
 		$scope.urlValid = false;
 		$scope.urlInValid = false;
@@ -19,6 +23,74 @@
 			NATIVE_WEBVIEW: 'Native webview'
 		};
 
+        function initializeMonaco() {
+            const editorElement = document.getElementById('monacoEditor');
+            const baseUrl = window.location.origin + window.location.pathname.replace(/\\/g, '/').replace(/\/[^/]*$/, '/');
+            
+            if (typeof monaco === 'undefined') {
+                const script = document.createElement('script');
+                script.src = `${baseUrl}js/monaco-editor/min/vs/loader.js`;
+                script.onload = () => setupMonaco();
+                document.head.appendChild(script);
+            } else {
+                setupMonaco();
+            }
+
+            function setupMonaco() {
+                require.config({ paths: { 'vs': `${baseUrl}js/monaco-editor/min/vs` } });
+                require(['vs/editor/editor.main'], function () {
+                    window.monacoEditorInstance = monaco.editor.create(editorElement, {
+                        value: $scope.data.content.html || '',
+                        language: 'html',
+                        theme: 'vs-dark',
+                        automaticLayout: true
+                    });
+					// check for disclaimer acknowledgment
+					disclaimerAcknowledged = $scope.data?.content?.disclaimerAcknowledged;
+					conversationId = $scope.data?.content?.conversationId || null;
+					toggleAssistantSectionVisibility(!!conversationId);
+					if (!disclaimerAcknowledged) {
+						window.dialogs.showDisclaimerDialog(() => {
+							dataChanged = true;
+							disclaimerAcknowledged = true;
+							$scope.saveData();
+						});
+					}
+                    registerAutoSave(window.monacoEditorInstance);
+                });
+            }
+        }
+        // Always auto-save on editor change
+		function registerAutoSave(editor, delay = 500) {
+			let timer = null;
+			function onChange() {
+				if (timer) clearTimeout(timer);
+				timer = setTimeout(function () {
+					$scope.data.content.html = editor.getValue();
+					dataChanged = true;
+					$scope.saveData();
+					$scope.$apply();
+				}, delay);
+			}
+			editor.onDidChangeModelContent(onChange);
+		}
+
+		// toggle assistant section visibility
+		function toggleAssistantSectionVisibility(visible) {
+			const assistantContainer = document.querySelector('.assistant-container');
+			if (assistantContainer) {
+				if (visible) {
+					assistantContainer.style.display = 'block';
+					assistantContainer.classList.add('visible');
+				} else {
+					assistantContainer.classList.remove('visible');
+					setTimeout(() => {
+						assistantContainer.style.display = 'none';
+					}, 300);
+				}
+			}
+		}
+
 		buildfire.datastore.get(function(err, result) {
 			if (err) return console.error('Error: ', err);
 
@@ -26,30 +98,46 @@
 
 			if (isValidResult(result)) {
 				$scope.data = result.data;
-				$scope.id = result.id;
-
-				var type = typeof result.data.content.openInApp;
-
-				if (type != 'undefined' && type != 'object') {
-					if (result.data.content.openInApp) {
-						$scope.data.content.view = $scope.viewType.NATIVE_IN_APP;
-					} else {
-						$scope.data.content.view = $scope.viewType.IN_APP_POPUP;
-					}
-				}
-
-				// Backward compatibility: If viewType.NATIVE_IN_APP was selected before, default to viewSubtype.IFRAME
-				if ($scope.data.content.view === $scope.viewType.NATIVE_IN_APP && !$scope.data.content.viewSubtype) {
-					$scope.data.content.viewSubtype = $scope.viewSubtype.IFRAME;
-				}
+                // Ensure default for autoReload if it doesn't exist
+                if (typeof $scope.data.content.autoReload === 'undefined') {
+                    $scope.data.content.autoReload = true;
+                }
+                // Ensure isCustomContent is boolean
+                $scope.data.content.isCustomContent = !!$scope.data.content.isCustomContent;
+                var autoReloadSwitch = document.getElementById('autoReloadSwitch');
+                autoReloadSwitch.checked = $scope.data.content.autoReload;
 			} else {
+				var defaultHTML = [
+					'<!DOCTYPE html>',
+					'<html>',
+					'\t<head>',
+					'\t\t<meta name="viewport" content="width=device-width, initial-scale=1.0">',
+					'\t\t<meta charset="utf-8" />',
+					'\t\t<style>',
+					'\t\t\tbody {',
+					'\t\t\t\tdisplay: initial;',
+					'\t\t\t}',
+					'\t\t</style>',
+					'\t</head>',
+					'\t<body>',
+					'\t\t<div>Add your content here</div>',
+					'\t\t<script>',
+					'\t\t\tconsole.log(\'Web Content Loaded\')',
+					'\t\t</script>',
+					'\t</body>',
+					'</html>'
+				].join('\n');
+				
 				$scope.data = {
 					content: {
 						url: '',
-						view: $scope.viewType.IN_APP_POPUP,
-						viewSubtype: null // Initialize viewSubtype
-					}
-        };
+						html: defaultHTML,
+						isCustomContent: false, // Default to URL mode
+						autoReload: true // Default auto-reload to true
+					},
+				};
+				var autoReloadSwitch = document.getElementById('autoReloadSwitch');
+                autoReloadSwitch.checked = true;
 			}
 
 			$scope.$watch('data', watchFn, true);
@@ -59,10 +147,15 @@
 				} else {
 					dataChanged = true;
 				}
-      }
+			}
 
 			if (!$scope.$$phase && !$scope.$root.$$phase) {
 				$scope.$apply();
+			}
+
+			// Only initialize Monaco if already in custom content mode
+			if ($scope.data.content.isCustomContent) {
+				initializeMonaco();
 			}
 
 			function isValidResult(res) {
@@ -83,30 +176,40 @@
 				return console.warn("data didn't change");
 			}
 
-			if ($scope.frmMain.$invalid) return setDataInvalid();
+			// set url data invalid, when url is invalid and the mode is not custom content
+			if ($scope.data.content.url && !$scope.isUrlValid($scope.data.content.url) && !$scope.data.content.isCustomContent) return setUrlDataInvalid();
 
 			var data = $scope.data;
 			dataChanged = false;
 
-			setDataValid();
+			// only set url data valid and prepend http when the mode is not custom content and the mode didn't change
+			if (!data.content.isCustomContent && !modeChanged) {
+				setUrlDataValid();
 
-			if (!/^https?\:\/\//.test(data.content.url)) {
-				data.content.url = 'http://' + data.content.url;
+				if (!/^https?\:\/\//.test(data.content.url)) {
+					data.content.url = 'http://' + data.content.url;
+				}
 			}
 
-			if (data.content.openInApp != undefined) {
-				data.content.openInApp = null;
+			if (data.content.isCustomContent) {
+				if (typeof disclaimerAcknowledged == 'boolean') {
+					data.content.disclaimerAcknowledged = disclaimerAcknowledged;
+				}
+				if (conversationId) {
+					data.content.conversationId = conversationId;
+				}
 			}
 
 			buildfire.datastore.save(data, function(err, result) {
 				if (err || !result) {
 					return $log.error('Error saving the widget details: ', err);
 				}
-
+				if ($scope.data.content.isCustomContent && $scope.data.content.autoReload) buildfire.messaging.sendMessageToWidget({ tag: 'reloadWebContent' });
+				modeChanged = false;
 				$log.info('Widget details saved');
 			});
 
-			function setDataInvalid() {
+			function setUrlDataInvalid() {
 				$log.warn('invalid data, details will not be saved');
 				$scope.urlValid = false;
 				$scope.urlInValid = true;
@@ -115,7 +218,7 @@
 				}, 3000);
 			}
 
-			function setDataValid() {
+			function setUrlDataValid() {
 				$scope.urlValid = true;
 				$scope.urlInValid = false;
 				$timeout(function() {
@@ -128,42 +231,211 @@
 			$scope.saveData();
 		};
 
-		$scope.changeViewType = function() {
-			dataChanged = true;
-			
-			if ($scope.frmMain.$invalid) return;
-
-			if ($scope.data.content.view === $scope.viewType.NATIVE_IN_APP && !$scope.data.content.viewSubtype) {
-				$scope.data.content.viewSubtype = $scope.viewSubtype.IFRAME;
-			}
-
-			var data = $scope.data;
-
-			if (data.content.openInApp != undefined) {
-				data.content.openInApp = null;
-			}
-			buildfire.datastore.save(data, function(err, result) {
-				if (err || !result) {
-				$log.error('Error saving the widget details: ', err);
-				} else {
-				$log.info('Widget details saved');
-				}
-			});
-		};
-
-		$scope.openMethodChanged = function() {
-			dataChanged = true;
-			buildfire.datastore.save($scope.data, function(err, result) {
-				if (err || !result) {
-					$log.error('Error saving the widget details: ', err);
-				} else {
-					$log.info('Widget details saved');
-				}
-			});
-		};
-
 		$scope.isUrlValid = function(url) {
 			return /[-a-zA-Z0-9@:%_\+.~#?&amp;//=]{2,256}\.[a-z]{2,6}\b(\/[-a-zA-Z0-9@:%_\+.~#?!?\/?\w\/?&amp;//=]*)?/.test(url);
 		};
-	}
+        
+        $scope.onModeChange = function() {
+			if (!$scope.datastoreInitialized) return;
+			
+			// Initialize Monaco if switching to custom content mode
+			if ($scope.data.content.isCustomContent && !window.monacoEditorInstance) {
+				initializeMonaco();
+			}
+			
+			// Check if switching to custom content with iFrame view
+			if ($scope.data.content.isCustomContent && 
+				$scope.data.content.view === $scope.viewType.NATIVE_IN_APP && 
+				($scope.data.content.viewSubtype === $scope.viewSubtype.IFRAME
+					|| !$scope.data.content.viewSubtype
+				)) {
+				
+				buildfire.dialog.show({
+					title: 'Warning',
+					message: "Some websites may not load or function properly in an iframe due to Apple security policies or site-level restrictions from platforms like Google or Amazon. If the page doesn't display as expected, try a different viewing option in the Settings tab.",
+					isMessageHTML: false,
+					showCancelButton: true,
+					actionButtons: [
+						{
+							text: 'Go to Settings',
+							type: 'success',
+							action: () => {
+								buildfire.navigation.navigateToTab({ tabTitle: 'Settings' });
+							}
+						}
+					]
+				});
+			}
+			
+			dataChanged = true;
+			modeChanged = true;
+			$scope.saveData();
+        };
+
+		// switch "undo" button visibility
+		function toggleUndoButtonVisibility(savedHtml) {
+			const undoBtn = document.getElementById('undoBtn');
+			if (undoBtn) {
+				undoBtn.style.display = savedHtml ? 'block' : 'none';
+			}
+		}
+
+		// continue AI conversation
+		function continueAIConversation(prompt) {
+			const limit = 50000;
+			const html = window.monacoEditorInstance.getValue().trim();
+			if (prompt) {
+				const userMessage = html + '\n\n' + prompt;
+				if (userMessage.length > limit) {
+					buildfire.dialog.alert({
+						message: 'The combined content and prompt exceed the character limit for AI generation. Please reduce size and try again.',
+					});
+					return;
+				}
+				buildfire.analytics.trackAction('webcontent-plugin-ai-update');
+				window.ai.generateAiCode({ message: userMessage, conversationId: conversationId }, (err, result) => {
+					if (err) {
+						buildfire.dialog.alert({
+							message: 'Error generating AI response.',
+						});
+						return;
+					}
+					savedHtml = html;
+					setEditorContent(window.monacoEditorInstance, result.response);
+					toggleUndoButtonVisibility(savedHtml);
+					toggleAssistantToastVisibility(true);
+				});
+			}
+		}
+
+		// toggle assistant section visibility
+		function toggleAssistantSectionVisibility(visible) {
+			const assistantContainer = document.querySelector('.assistant-container');
+			if (assistantContainer) {
+				if (visible) {
+					assistantContainer.style.display = 'block';
+					assistantContainer.classList.add('visible');
+				} else {
+					assistantContainer.classList.remove('visible');
+					setTimeout(() => {
+						assistantContainer.style.display = 'none';
+					}, 300);
+				}
+			}
+		}
+
+		// toggle assistant toast visibility
+		function toggleAssistantToastVisibility(visible) {
+			const assistantToast = document.querySelector('.assistant-toast');
+			if (assistantToast) {
+				if (visible) {
+					assistantToast.style.display = 'block';
+					assistantToast.classList.add('visible');
+					setTimeout(() => {
+						assistantToast.classList.remove('visible');
+						setTimeout(() => {
+							assistantToast.style.display = 'none';
+						}, 300);
+					}, 3000);
+				} else {
+					assistantToast.classList.remove('visible');
+					setTimeout(() => {
+						assistantToast.style.display = 'none';
+					}, 300);
+				}
+			}
+		}
+
+		// set editor content while maintaining undo behavior (command + z)
+		function setEditorContent(editor, content) {
+			const fullRange = editor.getModel().getFullModelRange();
+			const edit = {
+				range: fullRange,
+				text: content 
+			};
+
+			editor.executeEdits('source-of-change', [edit]);
+			editor.pushUndoStop();
+		}
+		(function() {
+			const assistantPromptEl = document.getElementById('assistantPrompt');
+			const undoBtnEl = document.getElementById('undoBtn');
+			const createWithAiBtnEl = document.getElementById('createWithAiBtn');
+			const reloadBtnEl = document.getElementById('reloadEditorBtn');
+			const autoReloadSwitchEl = document.getElementById('autoReloadSwitch');
+			const assistantToastDismissEl = document.querySelector('.dismiss-toast-icon');
+
+			reloadBtnEl.addEventListener('click', function () {
+				// send reload message to widget on button click
+				buildfire.messaging.sendMessageToWidget({ tag: 'reloadWebContent' });
+			});
+
+			// Send message to widget and save when autoReloadSwitch value changes
+			autoReloadSwitchEl.addEventListener('change', function () {
+				$scope.data.content.autoReload = autoReloadSwitchEl.checked;
+				dataChanged = true;
+				$scope.saveData();
+			});
+
+			createWithAiBtnEl.addEventListener('click', function () {
+				const html = window.monacoEditorInstance.getValue().trim();
+				window.dialogs.showAiDialog({conversationId}, (err, result) => {
+					if (err) {
+						buildfire.dialog.toast({
+							message: err,
+						});
+					} else {
+						savedHtml = html;
+						if (result) {
+							setEditorContent(window.monacoEditorInstance, result.response);
+							toggleUndoButtonVisibility(savedHtml);
+							toggleAssistantSectionVisibility(true);
+							if (result.conversationId) {
+								conversationId = result.conversationId;
+							}
+						}
+					}
+				});
+			});
+
+			undoBtnEl.addEventListener('click', function () {
+				if (savedHtml && window.monacoEditorInstance) {
+					window.monacoEditorInstance.setValue(savedHtml);
+					savedHtml = '';
+				}
+				toggleUndoButtonVisibility(savedHtml);
+			});
+
+			if (assistantToastDismissEl) {
+				assistantToastDismissEl.addEventListener('click', function () {
+					toggleAssistantToastVisibility(false);
+				});
+			}
+
+			assistantPromptEl.addEventListener('keydown', function(event) {
+				// Check if the pressed key is Enter
+				if (event.key === 'Enter') {
+
+					// Check for SHIFT + ENTER
+					if (event.shiftKey) {
+						console.log('Shift + Enter pressed: Adding a new line (default action)');
+					} else {
+						// ENTER ONLY: used to submit
+						event.preventDefault(); 
+						console.log('Enter pressed: Submitting the message');
+						if (assistantPromptEl.value.trim()) {
+							continueAIConversation(assistantPromptEl.value.trim());
+							this.value = '';
+							this.style.height = '40px';
+						}
+					}
+				}
+			});
+			assistantPromptEl.oninput = function () {
+				this.style.height = '40px';
+				const newHeight = Math.min(this.scrollHeight, 120);
+				this.style.height = `${newHeight}px`;
+			};
+		})();
+    }
 })(window.angular, window.buildfire);

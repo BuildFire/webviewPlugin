@@ -1,146 +1,110 @@
 ﻿<!DOCTYPE html>
-<html ng-app="webviewPlugin">
-<head lang="en">
-  <meta charset="UTF-8">
-  <title>content</title>
-  <!-- CSS -->
-  <link href="../../../../styles/helper.css" rel="stylesheet">
-  <link href="../../../../styles/siteIcons.css" rel="stylesheet">
-  <link href="../../../../styles/control/bf-base.css" rel="stylesheet">
+<html ng-app="webContentPlugin">
+  <head lang="en">
+    <meta charset="UTF-8">
+    <title>content</title>
+    <!-- CSS -->
+    <link href="../../../../styles/helper.css" rel="stylesheet">
+    <link href="assets/css/style.css" rel="stylesheet">
+    <link href="assets/css/dialogs.css" rel="stylesheet">
+    <link href="assets/css/cpIcons.css" rel="stylesheet">
 
-  <!-- JS -->
-  <script src="../../../../scripts/buildfire.js"></script>
-  <script src="../../../../scripts/angular/angular.min.js"></script>
-  <script src="app.js"></script>
-  <style>
-    .radio-block {
-      display: block !important;
-      padding-bottom: 5px;
-    }
-    .note {
-      padding: 12px 20px;
-      margin-top: 15px;
-      margin-bottom: 15px;
-      background: #F5F5F5;
-    }
-    .note .bold {
-      font-weight: 600;
-    }
-    .image-container img {
-      margin: 10px;
-      border-radius: 8px;
-      box-shadow: 0 0 8px 2px rgba(0,0,0,0.10);
-    }
-  </style>
-</head>
-<body ng-controller="webviewPluginCtrl" id="webviewApp" ng-cloak
-      ng-show="datastoreInitialized">
-<div ng-form="frmMain">
-
-  <div class="item clearfix row margin-bottom-fifteen">
-    <div class="labels col-md-3 padding-right-zero pull-left">
-      <span>URL</span>
-    </div>
-    <div class="main col-md-9 pull-right clearfix">
-      <div class="col-md-9 pull-left padding-left-zero">
-        <input id="url" name="url" type="text" class="form-control"
-               ng-model="data.content.url">
-      </div>
-      <div class="col-md-3 pull-right padding-zero">
-        <button class="btn btn-success stretch" ng-click="validateUrl()"
-                ng-disabled="!data.content.url">
-          Validate
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <div class="item clearfix row"
-       ng-if="data.content.url && !isUrlValid(data.content.url)">
-    <div class="main pull-right col-md-9">
-      <p style="color: #ff7164">Seems like
-        your url is not valid ! But if you
-        want,
-        you can
-        still
-        add it
-        to your plugin.</p>
-    </div>
-  </div>
-
-  <div class="item clearfix row">
-    <div class="main pull-right col-md-9">
-      <div class="alert alert-success alert-sm text-center" ng-if="urlValid">URL
-        successfully validated
-      </div>
-      <div class="alert alert-danger alert-sm text-center" ng-if="urlInValid">
-        Invalid Url
-      </div>
-    </div>
-  </div>
-  <hr class="none">
-  <div class="item clearfix row">
-    <div class="image-container col-md-3 pull-left">
-      <img 
-        ng-if="data.content.view === viewType.NATIVE_IN_APP"
-        ng-src="../../resources/native-webview.jpg"
-        alt="Native Webview Preview">
-      <img 
-        ng-if="data.content.view === viewType.IN_APP_POPUP"
-        ng-src="../../resources/popup-window.jpg"
-        alt="Popup Window Preview">
-      <img 
-        ng-if="data.content.view === viewType.EXTERNAL_BROWSER"
-        ng-src="../../resources/external-browser.jpg"
-        alt="External Browser Preview">
-    </div>
-    <div class="col-md-9 pull-right">
-      <div class="radio radio-primary radio-block">
-        <input id="popup" type="radio" ng-model="data.content.view"
-               ng-value="viewType.IN_APP_POPUP"
-               name="viewType" ng-change="changeViewType()">
-        <label for="popup">In Popup Window</label>
-      </div>
-      <div class="radio radio-primary radio-block">
-        <input id="inapp" type="radio" ng-model="data.content.view"
-               ng-value="viewType.NATIVE_IN_APP"
-               name="viewType" ng-change="changeViewType()">
-        <label for="inapp">In Feature</label>
-      </div>
-      <div ng-if="data.content.view === viewType.NATIVE_IN_APP" class="flex margin-left-twenty">
-        <div class="radio radio-primary radio-block">
-          <input id="insideIframe" type="radio" ng-model="data.content.viewSubtype"
-                 ng-value="viewSubtype.IFRAME"
-                 name="viewSubtype" ng-change="changeViewType()">
-          <label for="insideIframe">iFrame</label>
-        </div>
-        <div class="radio radio-primary radio-block margin-top-ten margin-left-twenty">
-          <input id="nativeWebview" type="radio" ng-model="data.content.viewSubtype"
-                 ng-value="viewSubtype.NATIVE_WEBVIEW"
-                 name="viewSubtype" ng-change="changeViewType()">
-          <label for="nativeWebview">Native Webview (Beta)</label>
+    <!-- JS -->
+    <script src="../../../../scripts/buildfire.js"></script>
+    <script src="../../../../scripts/buildfire/services/ai/ai.js"></script>
+    <script src="../../../../scripts/angular/angular.min.js"></script>
+    <script src="js/dialogs/dialogs.js"></script>
+    <script src="js/ai/ai.js"></script>
+    <script src="app.js"></script>
+  </head>
+  <body ng-controller="webContentPluginCtrl" id="webContentApp" ng-cloak
+        ng-show="datastoreInitialized" class="hide-scrollbar">
+    <div ng-form="frmMain" class="main-form">
+      <div class="item clearfix row">
+        <div class="main col-md-12">
+          <div class="button-switch flex-between">
+            <span>Content Type</span>
+            <div>
+              <div class="radio radio-primary radio-block">
+                <input id="urlRadio" type="radio"
+                      name="contentType"
+                      ng-model="data.content.isCustomContent"
+                      ng-value="false"
+                      ng-change="onModeChange()">
+                <label for="urlRadio">Website URL</label>
+              </div>
+              <div class="radio radio-primary radio-block">
+                <input id="editorRadio" type="radio"
+                      name="contentType"
+                      ng-model="data.content.isCustomContent"
+                      ng-value="true"
+                      ng-change="onModeChange()">
+                <label for="editorRadio">Custom Code</label>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="note" ng-if="data.content.view === viewType.NATIVE_IN_APP && data.content.viewSubtype === viewSubtype.IFRAME">
-        <span class="bold">Some websites may not work correctly when opened inside the app, especially in the built-in browser view.</span> This is often due to Apple’s security rules or website settings from companies like Google and Amazon that block their pages from being shown in this way. If your webpage doesn’t load or work as expected, we recommend trying one of the other viewing options available.
+      <!-- URL Section: Show only when isCustomContent is false -->
+      <div id="urlContent" ng-show="!data.content.isCustomContent">
+        <p class="note">You can customize how this webpage opens in the app from the <a onclick="buildfire.navigation.navigateToTab({tabTitle: 'Settings'});">Settings tab</a></p>
+        <div class="item margin-bottom-fifteen flex-between">
+          <span>URL</span>
+          <input id="url" name="url" type="text" class="form-control"
+                  ng-model="data.content.url">
+          <button class="btn btn-success" ng-click="validateUrl()"
+                  ng-disabled="!data.content.url">
+            Validate
+          </button>
+        </div>
+
+        <div class="item">
+          <div class="main alerts-wrapper pull-right">
+            <div class="alert alert-success alert-sm text-center" ng-if="urlValid">URL
+              successfully validated
+            </div>
+            <div class="alert alert-danger alert-sm text-center" ng-if="urlInValid">
+              Invalid Url
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="note" ng-if="data.content.view === viewType.NATIVE_IN_APP && data.content.viewSubtype === viewSubtype.NATIVE_WEBVIEW">
-        Native Webview is a new feature that works around iFrame issues. If the iFrame option isn’t working, try using Native Webview instead.
-        <div class="bold margin-top-twenty">Note: This feature will only work for apps with builds submitted to Apple App Store and Google Play Store after 5, August 2025. For older builds the app will default to "In Popup Window" option.</div>
+
+      <!-- Monaco Editor Section: Show only when isCustomContent is true -->
+      <div id="customContent" ng-show="data.content.isCustomContent">
+        <p class="note">
+          <span class="bold">
+            Note:
+          </span>
+          Always save your code externally as we don't keep versions.
+        </p>
+        <div class="editor">
+          <div id="monacoEditor"></div>
+          <div class="assistant-container">
+            <div class="assistant-toast">Updated code.
+              <span class="icon icon-cross2 dismiss-toast-icon"></span>
+            </div>
+            <textarea type="text" placeholder="Ask AI to make an edit..." id="assistantPrompt" class="assistant-textarea"></textarea>
+          </div>
+        </div>
+
+        <div class="flex-between btns-container">
+          <div class="flex-between">
+            <button id="createWithAiBtn" class="btn create-ai-btn">
+              <img src="assets/images/ai_icon.svg" alt="">
+              Create with AI
+            </button> 
+              <a id="undoBtn" class="btn link-btn margin-left-ten">Undo</a>
+          </div>
+          <button id="reloadEditorBtn" class="btn run-code-btn">Run Code</button>
+        </div>
+        <hr>
+        <div class="button-switch flex-between">
+          <div class="text">Auto-Run Code</div>
+          <input id="autoReloadSwitch" type="checkbox">
+          <label for="autoReloadSwitch" class="label-success"></label>
+        </div>
       </div>
-      <div class="radio radio-primary radio-block">
-        <input id="external" type="radio" ng-model="data.content.view"
-               ng-value="viewType.EXTERNAL_BROWSER"
-               name="viewType" ng-change="changeViewType()">
-        <label for="external">Device's default external browser</label>
-      </div>
-      <div class="note">
-        <div>For the best experience, link to mobile-optimized and secure (HTTPS) content. If your webpage includes payment processing, it must open outside of the app—otherwise, Apple may reject your app during review. Also, be aware that some websites only display their mobile layout on actual mobile devices.</div>
-        <div class="bold margin-top-twenty">Note: If you’re accepting payments, use a Deep Link to redirect users back into your app after the transaction is complete.</div>
-      </div>
-      
     </div>
-  </div>
-</div>
-</body>
+  </body>
 </html>
