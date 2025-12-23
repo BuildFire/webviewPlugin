@@ -1,7 +1,7 @@
 {
   "author":"Buildfire"
   ,"pluginName":"Web Content"
-  ,"pluginDescription":"Seamlessly embed web content into your mobile app with the Web Content plugin, enabling smooth integration of external websites, pages, and interactive elements."
+  ,"pluginDescription":"Seamlessly embed external website pages as native screens in your app. Also, use our coding terminal or AI assistant to create custom content and interactive elements."
   ,"pluginKeywords":"document,page,iframe,instagram,website"
   ,"supportEmail":"support@buildfire.com"
   ,"supportSite":"https://learn.appdocumentation.com/en/articles/1691379-webview-tutorial"

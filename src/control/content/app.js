@@ -48,7 +48,6 @@
 					// check for disclaimer acknowledgment
 					disclaimerAcknowledged = $scope.data?.content?.disclaimerAcknowledged;
 					conversationId = $scope.data?.content?.conversationId || null;
-					toggleAssistantSectionVisibility(!!conversationId);
 					if (!disclaimerAcknowledged) {
 						window.dialogs.showDisclaimerDialog(() => {
 							dataChanged = true;
@@ -73,22 +72,6 @@
 				}, delay);
 			}
 			editor.onDidChangeModelContent(onChange);
-		}
-
-		// toggle assistant section visibility
-		function toggleAssistantSectionVisibility(visible) {
-			const assistantContainer = document.querySelector('.assistant-container');
-			if (assistantContainer) {
-				if (visible) {
-					assistantContainer.style.display = 'block';
-					assistantContainer.classList.add('visible');
-				} else {
-					assistantContainer.classList.remove('visible');
-					setTimeout(() => {
-						assistantContainer.style.display = 'none';
-					}, 300);
-				}
-			}
 		}
 
 		buildfire.datastore.get(function(err, result) {
@@ -133,7 +116,8 @@
 						url: '',
 						html: defaultHTML,
 						isCustomContent: false, // Default to URL mode
-						autoReload: true // Default auto-reload to true
+						autoReload: true, // Default auto-reload to true
+						view: $scope.viewType.IN_APP_POPUP // Default to popup
 					},
 				};
 				var autoReloadSwitch = document.getElementById('autoReloadSwitch');
@@ -292,7 +276,8 @@
 					});
 					return;
 				}
-				buildfire.analytics.trackAction('webcontent-plugin-ai-update');
+				const actionName = conversationId ? 'webcontent-plugin-ai-update' : 'webcontent-plugin-ai-generate';
+				buildfire.analytics.trackAction(actionName);
 				window.ai.generateAiCode({ message: userMessage, conversationId: conversationId }, (err, result) => {
 					if (err) {
 						buildfire.dialog.alert({
@@ -305,22 +290,6 @@
 					toggleUndoButtonVisibility(savedHtml);
 					toggleAssistantToastVisibility(true);
 				});
-			}
-		}
-
-		// toggle assistant section visibility
-		function toggleAssistantSectionVisibility(visible) {
-			const assistantContainer = document.querySelector('.assistant-container');
-			if (assistantContainer) {
-				if (visible) {
-					assistantContainer.style.display = 'block';
-					assistantContainer.classList.add('visible');
-				} else {
-					assistantContainer.classList.remove('visible');
-					setTimeout(() => {
-						assistantContainer.style.display = 'none';
-					}, 300);
-				}
 			}
 		}
 
@@ -389,7 +358,6 @@
 						if (result) {
 							setEditorContent(window.monacoEditorInstance, result.response);
 							toggleUndoButtonVisibility(savedHtml);
-							toggleAssistantSectionVisibility(true);
 							if (result.conversationId) {
 								conversationId = result.conversationId;
 							}

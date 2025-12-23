@@ -102,9 +102,9 @@ window.dialogs = {
                             </div>
                             <div class="ai-examples-title">Examples of Prompts</div>
                             <ul class="ai-examples hide-scrollbar">
-                                <li>Create a weather plugin that fetches data from a public API and displays current weather conditions.</li>
-                                <li>Build a quiz plugin that presents multiple-choice questions and provides feedback on answers.</li>
-                                <li>Design a testimonials plugin that displays user reviews in a carousel format.</li>
+                                <li>Create an interactive mortgage calculator with input fields for loan amount, interest rate, and term length.</li>
+                                <li>Build a restaurant menu page with categories, dish descriptions, prices, and high-quality food images.</li>
+                                <li>Design a live event countdown timer with registration details and an embedded video stream.</li>
                             </ul>
                         </div>
                     </div>
