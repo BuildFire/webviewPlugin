@@ -1,5 +1,5 @@
-window.dialogs = {
-	showDisclaimerDialog: function (callback) {
+angular.module('webContentPlugin').service('dialogService', ['aiService', function(aiService) {
+	this.showDisclaimerDialog = function (callback) {
 		function closeDialog() {
 			if (callback) callback();
 			if (backdrop) {
@@ -18,12 +18,12 @@ window.dialogs = {
 		dialogContainer.innerHTML = `
                 <div class="dialog">
                     <div class="dialog-header">
-                        <div class="dialog-title">Create your own plugin</div>
+                        <div class="dialog-title">Create your own content</div>
                     </div>
                     <div class="dialog-body">
                         <p class="bold">&#9888;&#65039; Warning</p>
                         <p>
-                            We don't review, test, or guarantee the performance or security of custom code. By using this plugin, you're taking ownership of how your custom code behaves in your app.
+                            We don't review, test, or guarantee the performance or security of custom code. By using this feature, you're taking ownership of how your custom code behaves in your app.
                         </p>
 						<p>
 							Any technical issues that may arise from custom code will not be covered by our support team.
@@ -61,8 +61,9 @@ window.dialogs = {
 				closeDialog();
 			});
 		}
-	},
-	showAiDialog: function (options, callback) {
+	};
+
+	this.showAiDialog = function (options, callback) {
 		const limit = 10000;
 		showDialog();
 
@@ -93,7 +94,7 @@ window.dialogs = {
                             <span class="icon icon-cross2 close-icon" aria-label="Close dialog"></span>
                         </div>
                         <div class="dialog-body">
-                            <textarea class="ai-prompt" rows="6" placeholder="Describe your plugin here..."></textarea>
+                            <textarea class="ai-prompt" rows="6" placeholder="Describe your content here..."></textarea>
                             <div class="create-assistant-container">
                                 <button id="generateAiBtn" class="btn create-ai-btn">
                                     <img src="assets/images/ai_icon.svg" alt="">
@@ -103,8 +104,8 @@ window.dialogs = {
                             <div class="ai-examples-title">Examples of Prompts</div>
                             <ul class="ai-examples hide-scrollbar">
                                 <li>Create an interactive mortgage calculator with input fields for loan amount, interest rate, and term length.</li>
-                                <li>Build a restaurant menu page with categories, dish descriptions, prices, and high-quality food images.</li>
-                                <li>Design a live event countdown timer with registration details and an embedded video stream.</li>
+                                <li>Build a restaurant menu page with the ability to filter by lunch/dinner/dessert/drinks.</li>
+                                <li>Design a live event countdown timer with registration details and an embedded Google map of nearest event venue.</li>
                             </ul>
                         </div>
                     </div>
@@ -131,7 +132,7 @@ window.dialogs = {
 					return;
 				}
 				buildfire.analytics.trackAction('webcontent-plugin-ai-generate');
-				window.ai.generateAiCode({ message: aiPrompt.value }, (err, res) => {
+				aiService.generateAiCode({ message: aiPrompt.value }, (err, res) => {
 					if (err || !res) {
 						buildfire.dialog.alert({
 							message: 'Error generating AI response.',
@@ -139,7 +140,7 @@ window.dialogs = {
 						return;
 					}
 					if (options.conversationId) {
-						window.ai.deleteConversation(options.conversationId);
+						aiService.deleteConversation(options.conversationId);
 					}
 					closeDialog(res);
 				});
@@ -165,5 +166,5 @@ window.dialogs = {
 				});
 			});
 		}
-	}
-};
+	};
+}]);

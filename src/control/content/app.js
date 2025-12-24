@@ -1,14 +1,15 @@
 (function(angular, buildfire) {
 	var webContentPluginApp = angular.module('webContentPlugin', []);
 
-	webContentPluginApp.controller('webContentPluginCtrl', ['$scope', '$log', '$timeout', controller]);
+	webContentPluginApp.controller('webContentPluginCtrl', ['$scope', '$log', '$timeout', 'aiService', 'dialogService', controller]);
 
-	function controller($scope, $log, $timeout) {
+	function controller($scope, $log, $timeout, aiService, dialogService) {
 		var dataChanged = false;
 		var modeChanged = false;
 		var disclaimerAcknowledged = null;
 		var savedHtml = '';
 		var conversationId = null;
+		var monacoEditorInstance = null;
 		$scope.datastoreInitialized = false;
 		$scope.urlValid = false;
 		$scope.urlInValid = false;
@@ -39,23 +40,23 @@
             function setupMonaco() {
                 require.config({ paths: { 'vs': `${baseUrl}js/monaco-editor/min/vs` } });
                 require(['vs/editor/editor.main'], function () {
-                    window.monacoEditorInstance = monaco.editor.create(editorElement, {
+                    monacoEditorInstance = monaco.editor.create(editorElement, {
                         value: $scope.data.content.html || '',
                         language: 'html',
                         theme: 'vs-dark',
                         automaticLayout: true
                     });
 					// check for disclaimer acknowledgment
-					disclaimerAcknowledged = $scope.data?.content?.disclaimerAcknowledged;
-					conversationId = $scope.data?.content?.conversationId || null;
+					disclaimerAcknowledged = $scope.data && $scope.data.content && $scope.data.content.disclaimerAcknowledged;
+					conversationId = ($scope.data && $scope.data.content && $scope.data.content.conversationId) || null;
 					if (!disclaimerAcknowledged) {
-						window.dialogs.showDisclaimerDialog(() => {
+						dialogService.showDisclaimerDialog(() => {
 							dataChanged = true;
 							disclaimerAcknowledged = true;
 							$scope.saveData();
 						});
 					}
-                    registerAutoSave(window.monacoEditorInstance);
+                    registerAutoSave(monacoEditorInstance);
                 });
             }
         }
@@ -223,7 +224,7 @@
 			if (!$scope.datastoreInitialized) return;
 			
 			// Initialize Monaco if switching to custom content mode
-			if ($scope.data.content.isCustomContent && !window.monacoEditorInstance) {
+			if ($scope.data.content.isCustomContent && !monacoEditorInstance) {
 				initializeMonaco();
 			}
 			
@@ -267,7 +268,7 @@
 		// continue AI conversation
 		function continueAIConversation(prompt) {
 			const limit = 50000;
-			const html = window.monacoEditorInstance.getValue().trim();
+			const html = monacoEditorInstance.getValue().trim();
 			if (prompt) {
 				const userMessage = html + '\n\n' + prompt;
 				if (userMessage.length > limit) {
@@ -278,7 +279,7 @@
 				}
 				const actionName = conversationId ? 'webcontent-plugin-ai-update' : 'webcontent-plugin-ai-generate';
 				buildfire.analytics.trackAction(actionName);
-				window.ai.generateAiCode({ message: userMessage, conversationId: conversationId }, (err, result) => {
+				aiService.generateAiCode({ message: userMessage, conversationId: conversationId }, (err, result) => {
 					if (err) {
 						buildfire.dialog.alert({
 							message: 'Error generating AI response.',
@@ -286,7 +287,8 @@
 						return;
 					}
 					savedHtml = html;
-					setEditorContent(window.monacoEditorInstance, result.response);
+					if (result.conversationId) conversationId = result.conversationId;
+					setEditorContent(monacoEditorInstance, result.response);
 					toggleUndoButtonVisibility(savedHtml);
 					toggleAssistantToastVisibility(true);
 				});
@@ -347,8 +349,8 @@
 			});
 
 			createWithAiBtnEl.addEventListener('click', function () {
-				const html = window.monacoEditorInstance.getValue().trim();
-				window.dialogs.showAiDialog({conversationId}, (err, result) => {
+				const html = monacoEditorInstance.getValue().trim();
+				dialogService.showAiDialog({conversationId}, (err, result) => {
 					if (err) {
 						buildfire.dialog.toast({
 							message: err,
@@ -356,7 +358,7 @@
 					} else {
 						savedHtml = html;
 						if (result) {
-							setEditorContent(window.monacoEditorInstance, result.response);
+							setEditorContent(monacoEditorInstance, result.response);
 							toggleUndoButtonVisibility(savedHtml);
 							if (result.conversationId) {
 								conversationId = result.conversationId;
@@ -367,8 +369,8 @@
 			});
 
 			undoBtnEl.addEventListener('click', function () {
-				if (savedHtml && window.monacoEditorInstance) {
-					window.monacoEditorInstance.setValue(savedHtml);
+				if (savedHtml && monacoEditorInstance) {
+					monacoEditorInstance.setValue(savedHtml);
 					savedHtml = '';
 				}
 				toggleUndoButtonVisibility(savedHtml);

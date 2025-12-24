@@ -44,7 +44,7 @@
     },
     {
       "type": "image-resource",
-      "path": "5-Analytics-Tab.png"
+      "path": "5-Custom-Content.png"
     }
   ],
   "webpack": 8080

@@ -5,17 +5,21 @@
     <title>content</title>
     <!-- CSS -->
     <link href="../../../../styles/helper.css" rel="stylesheet">
+    <!-- build:css assets/css/bundle.min.css -->
     <link href="assets/css/style.css" rel="stylesheet">
     <link href="assets/css/dialogs.css" rel="stylesheet">
     <link href="assets/css/cpIcons.css" rel="stylesheet">
+    <!-- endbuild -->
 
     <!-- JS -->
-    <script src="../../../../scripts/buildfire.js"></script>
+    <script src="../../../../scripts/buildfire.min.js"></script>
     <script src="../../../../scripts/buildfire/services/ai/ai.js"></script>
     <script src="../../../../scripts/angular/angular.min.js"></script>
-    <script src="js/dialogs/dialogs.js"></script>
-    <script src="js/ai/ai.js"></script>
+    <!-- build:js js/bundle.min.js -->
     <script src="app.js"></script>
+    <script src="js/DialogsService.js"></script>
+    <script src="js/AIService.js"></script>
+    <!-- endbuild -->
   </head>
   <body ng-controller="webContentPluginCtrl" id="webContentApp" ng-cloak
         ng-show="datastoreInitialized" class="hide-scrollbar">
