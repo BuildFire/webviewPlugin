@@ -1,10 +1,82 @@
 <!DOCTYPE html>
-<html>
-<head lang="en">
+<html ng-app="webContentPluginSettings">
+  <head lang="en">
     <meta charset="UTF-8">
-    <title></title>
-</head>
-<body>
-	no settings
-</body>
+    <title>Settings</title>
+    <link href="../../../../styles/helper.css" rel="stylesheet">
+    <!-- build:css assets/css/bundle.min.css -->
+    <link href="assets/css/style.css" rel="stylesheet">
+    <!-- endbuild -->
+    <script src="../../../../scripts/buildfire.min.js"></script>
+    <script src="../../../../scripts/angular/angular.min.js"></script>
+    <!-- build:js js/bundle.min.js -->
+    <script src="app.js"></script>
+    <!-- endbuild -->
+  </head>
+  <body ng-controller="webContentPluginSettingsCtrl" id="webContentSettings" ng-cloak>
+    <div ng-form="frmMain">
+      <!-- Paste the content block here -->
+      <div class="item clearfix row">
+        <div class="image-container col-md-3 pull-left">
+          <img 
+            ng-if="data.content.view === viewType.NATIVE_IN_APP"
+            ng-src="../../resources/native-webview.jpg"
+            alt="Native Webview Preview">
+          <img 
+            ng-if="data.content.view === viewType.IN_APP_POPUP"
+            ng-src="../../resources/popup-window.jpg"
+            alt="Popup Window Preview">
+          <img 
+            ng-if="data.content.view === viewType.EXTERNAL_BROWSER"
+            ng-src="../../resources/external-browser.jpg"
+            alt="External Browser Preview">
+        </div>
+        <div class="col-md-9 pull-right">
+          <div class="radio radio-primary radio-block">
+            <input id="popup" type="radio" ng-model="data.content.view"
+                  ng-value="viewType.IN_APP_POPUP"
+                  name="viewType" ng-change="changeViewType()">
+            <label for="popup">In Popup Window</label>
+          </div>
+          <div class="radio radio-primary radio-block">
+            <input id="inapp" type="radio" ng-model="data.content.view"
+                  ng-value="viewType.NATIVE_IN_APP"
+                  name="viewType" ng-change="changeViewType()">
+            <label for="inapp">In Feature</label>
+          </div>
+          <div ng-if="data.content.view === viewType.NATIVE_IN_APP" class="flex margin-left-twenty">
+            <div class="radio radio-primary radio-block">
+              <input id="nativeWebview" type="radio" ng-model="data.content.viewSubtype"
+                    ng-value="viewSubtype.NATIVE_WEBVIEW"
+                    name="viewSubtype" ng-change="changeViewType()">
+              <label for="nativeWebview">Native Webview</label>
+            </div>
+            <div class="radio radio-primary radio-block margin-left-twenty margin-top-ten">
+              <input id="insideIframe" type="radio" ng-model="data.content.viewSubtype"
+                    ng-value="viewSubtype.IFRAME"
+                    name="viewSubtype" ng-change="changeViewType()">
+              <label for="insideIframe">iFrame</label>
+            </div>
+          </div>
+          <div class="note" ng-if="data.content.view === viewType.NATIVE_IN_APP && data.content.viewSubtype === viewSubtype.IFRAME">
+            <span class="bold">Some websites may not work correctly when opened inside the app, especially in the built-in browser view.</span> This is often due to Apple’s security rules or website settings from companies like Google and Amazon that block their pages from being shown in this way. If your webpage doesn’t load or work as expected, we recommend trying one of the other viewing options available.
+          </div>
+          <div class="note" ng-if="data.content.view === viewType.NATIVE_IN_APP && data.content.viewSubtype === viewSubtype.NATIVE_WEBVIEW">
+            Native Webview is a new feature that works around iFrame issues. If the iFrame option isn’t working, try using Native Webview instead.
+            <div class="bold margin-top-twenty">Note: This feature will only work for apps with builds submitted to Apple App Store and Google Play Store after 5, August 2025. For older builds the app will default to "In Popup Window" option.</div>
+          </div>
+          <div class="radio radio-primary radio-block">
+            <input id="external" type="radio" ng-model="data.content.view"
+                  ng-value="viewType.EXTERNAL_BROWSER"
+                  name="viewType" ng-change="changeViewType()">
+            <label for="external">Device's default external browser</label>
+          </div>
+          <div class="note">
+            <div>For the best experience, link to mobile-optimized and secure (HTTPS) content. If your webpage includes payment processing, it must open outside of the app—otherwise, Apple may reject your app during review. Also, be aware that some websites only display their mobile layout on actual mobile devices.</div>
+            <div class="bold margin-top-twenty">Note: If you’re accepting payments, use a Deep Link to redirect users back into your app after the transaction is complete.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
 </html>

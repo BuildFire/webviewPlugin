@@ -1,0 +1,18 @@
+.radio-block {
+  display: block !important;
+  padding-bottom: 5px;
+}
+.note {
+  padding: 12px 20px;
+  margin-top: 15px;
+  margin-bottom: 15px;
+  background: #F5F5F5;
+}
+.note .bold {
+  font-weight: 600;
+}
+.image-container img {
+  margin: 10px;
+  border-radius: 8px;
+  box-shadow: 0 0 8px 2px rgba(0,0,0,0.10);
+}
