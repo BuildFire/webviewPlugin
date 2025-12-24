@@ -10,6 +10,29 @@
 		var savedHtml = '';
 		var conversationId = null;
 		var monacoEditorInstance = null;
+
+		function getDefaultHTML() {
+			return [
+				'<!DOCTYPE html>',
+				'<html>',
+				'\t<head>',
+				'\t\t<meta name="viewport" content="width=device-width, initial-scale=1.0">',
+				'\t\t<meta charset="utf-8" />',
+				'\t\t<style>',
+				'\t\t\tbody {',
+				'\t\t\t\tdisplay: initial;',
+				'\t\t\t}',
+				'\t\t</style>',
+				'\t</head>',
+				'\t<body>',
+				'\t\t<div>Add your content here</div>',
+				'\t\t<script>',
+				'\t\t\tconsole.log(\'Web Content Loaded\')',
+				'\t\t</script>',
+				'\t</body>',
+				'</html>'
+			].join('\n');
+		}
 		$scope.datastoreInitialized = false;
 		$scope.urlValid = false;
 		$scope.urlInValid = false;
@@ -88,34 +111,17 @@
                 }
                 // Ensure isCustomContent is boolean
                 $scope.data.content.isCustomContent = !!$scope.data.content.isCustomContent;
+                // Add default HTML for old apps that don't have it
+                if (!$scope.data.content.html) {
+                    $scope.data.content.html = getDefaultHTML();
+                }
                 var autoReloadSwitch = document.getElementById('autoReloadSwitch');
                 autoReloadSwitch.checked = $scope.data.content.autoReload;
 			} else {
-				var defaultHTML = [
-					'<!DOCTYPE html>',
-					'<html>',
-					'\t<head>',
-					'\t\t<meta name="viewport" content="width=device-width, initial-scale=1.0">',
-					'\t\t<meta charset="utf-8" />',
-					'\t\t<style>',
-					'\t\t\tbody {',
-					'\t\t\t\tdisplay: initial;',
-					'\t\t\t}',
-					'\t\t</style>',
-					'\t</head>',
-					'\t<body>',
-					'\t\t<div>Add your content here</div>',
-					'\t\t<script>',
-					'\t\t\tconsole.log(\'Web Content Loaded\')',
-					'\t\t</script>',
-					'\t</body>',
-					'</html>'
-				].join('\n');
-				
 				$scope.data = {
 					content: {
 						url: '',
-						html: defaultHTML,
+						html: getDefaultHTML(),
 						isCustomContent: false, // Default to URL mode
 						autoReload: true, // Default auto-reload to true
 						view: $scope.viewType.IN_APP_POPUP // Default to popup
