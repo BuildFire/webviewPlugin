@@ -2,7 +2,7 @@
   "author":"Buildfire"
   ,"pluginName":"Web Content"
   ,"pluginDescription":"Seamlessly embed external website pages as native screens in your app. Also, use our coding terminal or AI assistant to create custom content and interactive elements."
-  ,"pluginKeywords":"document,page,iframe,instagram,website"
+  ,"pluginKeywords":"webview,document,page,iframe,instagram,website"
   ,"supportEmail":"support@buildfire.com"
   ,"supportSite":"https://learn.appdocumentation.com/en/articles/1691379-webview-tutorial"
   ,"pluginIcon":"icon.png"
